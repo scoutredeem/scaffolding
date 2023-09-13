@@ -73,7 +73,7 @@ const specTweaks = {
 const flutterPlatforms = ['ios', 'android', 'web', 'linux', 'macos', 'windows'];
 
 const templatePath =
-  'https://raw.githubusercontent.com/OneSheep/scaffolding/main/flutter';
+  'https://raw.githubusercontent.com/scoutredeem/scaffolding/main/flutter';
 
 let collectedPackages = [];
 let chosenPackages = [];

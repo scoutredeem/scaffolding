@@ -14,37 +14,37 @@ curl -fsSL https://deno.land/x/install/install.sh | sh
 New Flutter project:
 
 ```
-deno run -A https://raw.githubusercontent.com/OneSheep/scaffolding/main/flutter/init.js
+deno run -A https://raw.githubusercontent.com/scoutredeem/scaffolding/main/flutter/init.js
 ```
 
 Documentation site for project handbook:
 
 ```
-svn export https://github.com/OneSheep/scaffolding.git/trunk/docs
+svn export https://github.com/scoutredeem/scaffolding.git/trunk/docs
 ```
 
 Documentation folder for a single repo project:
 
 ```
-svn export https://github.com/OneSheep/scaffolding.git/trunk/docs/docs
+svn export https://github.com/scoutredeem/scaffolding.git/trunk/docs/docs
 ```
 
 Prettier config for a project:
 
 ```
- curl https://raw.githubusercontent.com/OneSheep/scaffolding/main/.prettierrc > .prettierrc
+ curl https://raw.githubusercontent.com/scoutredeem/scaffolding/main/.prettierrc > .prettierrc
 ```
 
 Changelog version configuration for a project:
 
 ```
- curl https://raw.githubusercontent.com/OneSheep/scaffolding/main/.versionrc > .versionrc
+ curl https://raw.githubusercontent.com/scoutredeem/scaffolding/main/.versionrc > .versionrc
 ```
 
 Grab the commit lint configuration for a project:
 
 ```
- curl https://raw.githubusercontent.com/OneSheep/scaffolding/main/commitlint.config.js > commitlint.config.js
+ curl https://raw.githubusercontent.com/scoutredeem/scaffolding/main/commitlint.config.js > commitlint.config.js
 ```
 
 [1]: https://github.com/dsherret/dax
