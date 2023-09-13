@@ -155,7 +155,6 @@ const createApp = async () => {
   await $`flutter create --org ${org} -t app --platforms ${platforms} ${appName}`;
 
   await $.cd(`${path}/${appName}`);
-  console.log(await $`ls -la`.text());
 };
 
 const makeFolders = async () => {
