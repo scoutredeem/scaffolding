@@ -1,5 +1,8 @@
-#!/usr/bin/env zx
-const { prompt } = require('enquirer');
+#!/usr/bin/env -S deno run
+
+import $ from 'https://deno.land/x/dax/mod.ts';
+import chalk from 'https://deno.land/x/chalk_deno@v4.1.1-deno/source/index.js';
+
 const rootFolders = [
   '_meta',
   'assets/fonts',
@@ -70,7 +73,7 @@ const specTweaks = {
 const flutterPlatforms = ['ios', 'android', 'web', 'linux', 'macos', 'windows'];
 
 const templatePath =
-  'https://raw.githubusercontent.com/OneSheep/scaffolding/main/flutter';
+  'https://raw.githubusercontent.com/scoutredeem/scaffolding/main/flutter';
 
 let collectedPackages = [];
 let chosenPackages = [];
@@ -109,56 +112,41 @@ const tweakTemplates = async () => {
 };
 
 const createApp = async () => {
-  const responseAppName = await prompt([
-    {
-      type: 'input',
-      name: 'appName',
-      message:
-        'Right, what shall we call it? Enter a valid package name like the_verge: ',
-    },
-  ]);
-
-  let appName = responseAppName['appName'];
+  const appName = await $.prompt(
+    'Right, what shall we call it? Enter a valid package name: ',
+    { default: 'test_app', noClear: true },
+  );
 
   const defaultBundleId = `org.onesheep.${appName}`;
 
-  const responseOrg = await prompt([
-    {
-      type: 'input',
-      name: 'org',
-      message: `Enter reverse domain for bundle id. [${defaultBundleId}]: `,
-    },
-  ]);
+  const org = await $.prompt('Enter reverse domain for bundle id: ', {
+    default: defaultBundleId,
+    noClear: true,
+  });
 
-  let org = responseOrg['org'];
+  const flutterPlatformIndexes = await $.multiSelect({
+    message: 'What platforms are we targeting?',
+    options: flutterPlatforms,
+    noClear: true,
+  });
 
-  const responsePlatforms = await prompt([
-    {
-      type: 'multiselect',
-      name: 'collectedPlatforms',
-      message: `What platforms are we targeting?`,
-      choices: flutterPlatforms,
-    },
-  ]);
+  collectedPlatforms = flutterPlatformIndexes.map((index) => flutterPlatforms[index]);
 
-  collectedPlatforms = responsePlatforms['collectedPlatforms'];
+  const packagesIndexes = await $.multiSelect({
+    message: 'What packages will the app need?',
+    options: recommendedPackages,
+    noClear: true,
+  });
 
-  const responsePackages = await prompt([
-    {
-      type: 'multiselect',
-      name: 'collectedPackages',
-      message: `What packages will the app need?`,
-      choices: recommendedPackages,
-    },
-  ]);
-  chosenPackages = responsePackages['collectedPackages'];
+  chosenPackages = packagesIndexes.map((index) => recommendedPackages[index]);
+
   chosenPackages.forEach((element) => {
     collectedPackages.push(element.split('|')[0]);
   });
 
   if (org == '') org = defaultBundleId;
 
-  let path = (await $`pwd`).stdout.split('\n')[0];
+  let path = (await $`pwd`.text()).split('\n')[0];
 
   console.log(`\nCreating app in ${path}/${appName} ...`);
   const platforms = collectedPlatforms.join(',');
@@ -166,7 +154,7 @@ const createApp = async () => {
   // flutter create--org org.onesheep.test - t app--platforms ios, android mini
   await $`flutter create --org ${org} -t app --platforms ${platforms} ${appName}`;
 
-  cd(`${path}/${appName}`);
+  await $.cd(`${path}/${appName}`);
 };
 
 const makeFolders = async () => {
@@ -186,14 +174,14 @@ const installPackages = async () => {
 };
 
 const installDevPackages = async () => {
-  for (const dev of devPackages) {
-    await $`flutter pub add --dev ${dev}`;
-  }
+  await $`flutter pub add --dev ${devPackages.join(' ')}`;
 };
 
 const fetchTemplates = async () => {
   for (const template of templates) {
-    await $`curl -fsSL ${templatePath}/${template} > ${template}`;
+    console.log('Fetching template: ', template);
+    const content = await $`curl -fsSL ${templatePath}/${template}`.text();
+    await Deno.writeTextFile(template, content);
   }
 };
 
