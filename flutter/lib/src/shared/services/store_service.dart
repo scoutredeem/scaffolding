@@ -25,7 +25,7 @@ class StoreService {
   // Settings
   // ------------------------------------
   String get themeMode => _box.get(
-        Keys.themeMode,
+        Keys.themeMode.toString(),
         defaultValue: 'light',
       );
 

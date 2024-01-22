@@ -11,12 +11,12 @@ final GoRouter routes = GoRouter(
       builder: (BuildContext context, GoRouterState state) {
         return const RootScreen();
       },
-      routes: [],
+      routes: const [],
     ),
     GoRoute(
       path: SettingsView.routeName,
       builder: (BuildContext context, GoRouterState state) {
-        return SettingsView();
+        return const SettingsView();
       },
     ),
   ],

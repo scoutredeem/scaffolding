@@ -8,6 +8,7 @@ For setting up the Dart SDK and Flutter, see the
 To set up Firebase, run the following:
 
 ```
+firebase login
 flutterfire configure
 ```
 

@@ -5,9 +5,7 @@ import '../settings/settings_screen.dart';
 
 /// Placeholder for home screen
 class RootScreen extends StatelessWidget {
-  const RootScreen({
-    Key? key,
-  }) : super(key: key);
+  const RootScreen({super.key});
 
   static const routeName = '/';
 

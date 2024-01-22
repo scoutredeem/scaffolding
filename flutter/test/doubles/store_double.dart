@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 
 class StoreDouble extends StoreService {
-  StoreDouble(Box box) : super.init(box);
+  StoreDouble(super.box) : super.init();
 
   static Future<StoreDouble> create(
       {String name = 'testbox', bool clearTheBox = true}) async {

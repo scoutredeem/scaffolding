@@ -6,7 +6,7 @@ import 'settings_manager.dart';
 
 /// Displays the various settings that can be customized by the user.
 class SettingsView extends WatchingWidget {
-  const SettingsView({Key? key}) : super(key: key);
+  const SettingsView({super.key});
 
   static const routeName = '/settings';
 

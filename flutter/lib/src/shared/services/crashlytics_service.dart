@@ -7,7 +7,6 @@ const _testCrashlytics = false;
 
 class CrashlyticsService {
   static Future<void> setUpCrashlytics() async {
-    print('crashlytics instance called');
     final crashlytics = FirebaseCrashlytics.instance;
     const bool inProductionMode = kDebugMode == false;
     const bool useCrashlytics = inProductionMode || _testCrashlytics;

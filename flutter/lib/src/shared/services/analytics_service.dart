@@ -5,7 +5,6 @@ class AnalyticsService {
   late FirebaseAnalytics _analytics;
 
   AnalyticsService() {
-    print('analytics instance called');
     _analytics = FirebaseAnalytics.instance;
     _analytics.setAnalyticsCollectionEnabled(!kDebugMode);
     // _analytics.setAnalyticsCollectionEnabled(true); // for testing
