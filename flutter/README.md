@@ -5,11 +5,11 @@
 For setting up the Dart SDK and Flutter, see the
 [official documentation](https://flutter.io/)
 
-To set up Firebase, run the following:
+To set up Firebase, run the following using your specific bundle id:
 
 ```
 firebase login
-flutterfire configure
+flutterfire configure -i your.ios.bundle-id.here -a your.android.package.name.here
 ```
 
 Or log in to the project firebase console and download the firebase config files for
