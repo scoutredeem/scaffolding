@@ -60,7 +60,7 @@ const recommendedPackages = [
   'url_launcher|launching links',
 ];
 
-const devPackages = ['flutter_launcher_icons'];
+const devPackages = ['flutter_launcher_icons', 'dart_style'];
 
 // Inserts into the pubspec.yaml file
 // the value gets inserted just after the line identified by the key
