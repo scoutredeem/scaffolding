@@ -1,7 +1,5 @@
 #!/usr/bin/env -S deno run
-// TODO: CAN WE UPDATE SQL SIZE LATER
-//       ADD IN AN OPTION FOR SETTING UP SQL
-//       preflight is there an environment example file
+
 import $ from 'https://deno.land/x/dax/mod.ts';
 import chalk from 'https://deno.land/x/chalk_deno@v4.1.1-deno/source/index.js';
 
@@ -124,6 +122,16 @@ const preflight = async () => {
     await $`which gcloud`.text();
   } catch (error) {
     throw new Error('gcloud is not installed.');
+  }
+
+  let lines = [];
+  try {
+    lines = await $`cat .env.example`.lines();
+  } catch (error) {
+    throw new Error('No .env.example file found in this folder');
+  }
+  if (lines.length < 2) {
+    throw new Error('.env.example file looks empty');
   }
 };
 
