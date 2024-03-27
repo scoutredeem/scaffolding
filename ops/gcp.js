@@ -30,6 +30,7 @@ const project = {
   name: '',
   number: '',
   account: '',
+  dbInstance: '',
 };
 
 const envVars = [];
@@ -38,22 +39,67 @@ const secrets = [];
 const run = async () => {
   try {
     await preflight();
-    await createConfig();
+    const config = await selectConfig();
+    if (!config) {
+      await createConfig();
+    }
     await authenticate();
     await setAccount();
-    await createProject();
-    await populateConfig();
+    await selectProject();
+    if (!project.id) {
+      await createProject();
+    }
     await enableAPIs();
+    await populateConfig();
     await createSqlInstance();
     await createDatabase('production');
     await getEnvironment();
     await createSecrets();
+    await createCloudRun();
   } catch (error) {
     $.logError(error.message);
     return;
   }
 
   $.logStep('Done!');
+};
+
+
+const selectProject = async () => {
+  const projects = await $`gcloud projects list --format=json`.json();
+  if (projects.length === 0) return;
+
+  const newProject = 'Create a new project';
+  const option = await $.select({
+    message: 'Select an existing project or create a new one',
+    options: [...projects.map((project) => project.name), newProject],
+  });
+
+  if (option == projects.length) return;
+
+  const selectedProject = projects[option];
+  project.id = selectedProject.projectId;
+  project.name = selectedProject.name;
+  project.number = selectedProject.projectNumber;
+};
+
+const selectConfig = async () => {
+  const configs = await $`gcloud config configurations list --format=json`.json();
+  if (configs.length === 0) return null;
+
+  const newProject = 'Create a new configuration';
+  const option = await $.select({
+    message: 'Select an existing project or create a new one',
+    options: [...configs.map((project) => project.name), newProject],
+  });
+
+  if (option == configs.length) return null;
+
+  const selectedConfig = configs[option];
+  // config.current = selectedConfig.name;
+  // project.id = selectedConfig.properties.core.project;
+  await $`gcloud config configurations activate ${selectedConfig.name}`.quiet();
+  return selectedConfig;
 };
 
 const createConfig = async () => {
@@ -133,6 +179,12 @@ const preflight = async () => {
   if (lines.length < 2) {
     throw new Error('.env.example file looks empty');
   }
+
+  try {
+    await $`cat Dockerfile`.lines();
+  } catch (error) {
+    throw new Error('No Dockerfile found in this folder');
+  }
 };
 
 const populateConfig = async () => {
@@ -140,28 +192,29 @@ const populateConfig = async () => {
 
   await $`gcloud config set project ${project.id}`.quiet();
   await $`gcloud config set account ${project.account}`.quiet();
-  await $`gcloud config set compute / region ${options.region}`.quiet();
+  await $`gcloud config set compute/region ${options.region}`.quiet();
   await $`gcloud config set compute/zone ${options.zone}`.quiet();
 };
 
 const enableAPIs = async () => {
-  $.logStep('Enabling necessary APIs');
+  const progress = $.progress("Enabling necessary APIs");
 
-  await $`gcloud services enable run.googleapis.com`.quiet();
-  await $`gcloud services enable compute.googleapis.com`.quiet();
-  await $`gcloud services enable cloudbuild.googleapis.com`.quiet();
-  await $`gcloud services enable secretmanager.googleapis.com`.quiet();
-  await $`gcloud services enable sourcerepo.googleapis.com`.quiet();
-  await $`gcloud services enable iam.googleapis.com`.quiet();
+  await progress.with(async () => {
+    await $`gcloud services enable run.googleapis.com`;
+    await $`gcloud services enable compute.googleapis.com`;
+    await $`gcloud services enable cloudbuild.googleapis.com`;
+    await $`gcloud services enable secretmanager.googleapis.com`;
+    await $`gcloud services enable sourcerepo.googleapis.com`;
+    await $`gcloud services enable iam.googleapis.com`;
+  });
 };
-
 
 const createSqlInstance = async () => {
   // https://cloud.google.com/sdk/gcloud/reference/sql/instances/create
   const result = await $.confirm('Do you want to create a SQL instance?');
   if (!result) return;
 
-  const instanceId = await $.prompt({
+  project.dbInstance = await $.prompt({
     message: 'SQL instance id',
     default: project.id,
     noClear: true,
@@ -177,9 +230,72 @@ const createSqlInstance = async () => {
   await progress.with(async () => {
     await $`gcloud services enable sql-component.googleapis.com`.quiet();
     await $`gcloud services enable sqladmin.googleapis.com`.quiet();
-    // --assign-ip
-    const instance = await $`gcloud sql instances create ${instanceId} --database-version=${options.dbEngine} --cpu=${options.dbCpu} --memory=${options.dbMemory} --zone=${options.zone} --root-password=${rootPassword} --format=json`.json();
-    console.log(instance);
+    const instance = await $`gcloud sql instances create ${project.dbInstance} --database-version=${options.dbEngine} --cpu=${options.dbCpu} --memory=${options.dbMemory} --zone=${options.zone} --root-password=${rootPassword} --format=json`.json();
+    //   {
+    //
+    //     backendType: "SECOND_GEN",
+    //     connectionName: "al-massira:europe-west1:al-massira",
+    //     createTime: "2024-03-27T13:00:49.773Z",
+    //     databaseInstalledVersion: "POSTGRES_15_5",
+    //     databaseVersion: "POSTGRES_15",
+    //     etag: "0a49d235e1bc81f920455c99350a6b27e1d6df4d187ad89a75edcb32af66b656",
+    //     gceZone: "europe-west1-d",
+    //     instanceType: "CLOUD_SQL_INSTANCE",
+    //     ipAddresses: [
+    //       { ipAddress: "35.241.168.185", type: "PRIMARY" },
+    //       { ipAddress: "35.205.76.144", type: "OUTGOING" }
+    //     ],
+    //     kind: "sql#instance",
+    //     maintenanceVersion: "POSTGRES_15_5.R20240130.00_07",
+    //     name: "al-massira",
+    //     project: "al-massira",
+    //     region: "europe-west1",
+    //     selfLink: "https://sqladmin.googleapis.com/sql/v1beta4/projects/al-massira/instances/al-massira",
+    //     serverCaCert: {
+    //       cert: "-----BEGIN CERTIFICATE-----\n" +
+    //         "MIIDfzCCAmegAwIBAgIBADANBgkqhkiG9w0BAQsFADB3MS0wKwYDVQQuEyQ3ZDJl\n" +
+    //         "MzhkNS0"... 1172 more characters,
+    //       certSerialNumber: "0",
+    //       commonName: "C=US,O=Google\\, Inc,CN=Google Cloud SQL Server CA,dnQualifier=7d2e38d5-53f0-4dd3-b86c-bf7a8b63db21",
+    //       createTime: "2024-03-27T13:01:49.854Z",
+    //       expirationTime: "2034-03-25T13:02:49.854Z",
+    //       instance: "al-massira",
+    //       kind: "sql#sslCert",
+    //       sha1Fingerprint: "e64da056239cfb5ea8d4b28b24f98708c4afa568"
+    //     },
+    //     serviceAccountEmailAddress: "p79323891240-n3o822@gcp-sa-cloud-sql.iam.gserviceaccount.com",
+    //     settings: {
+    //       activationPolicy: "ALWAYS",
+    //       availabilityType: "ZONAL",
+    //       backupConfiguration: {
+    //         backupRetentionSettings: { retainedBackups: 7, retentionUnit: "COUNT" },
+    //         enabled: false,
+    //         kind: "sql#backupConfiguration",
+    //         startTime: "00:00",
+    //         transactionLogRetentionDays: 7,
+    //         transactionalLogStorageState: "TRANSACTIONAL_LOG_STORAGE_STATE_UNSPECIFIED"
+    //       },
+    //       connectorEnforcement: "NOT_REQUIRED",
+    //       dataDiskSizeGb: "10",
+    //       dataDiskType: "PD_SSD",
+    //       deletionProtectionEnabled: false,
+    //       ipConfiguration: {
+    //         ipv4Enabled: true,
+    //         requireSsl: false,
+    //         sslMode: "ALLOW_UNENCRYPTED_AND_ENCRYPTED"
+    //       },
+    //       kind: "sql#settings",
+    //       locationPreference: { kind: "sql#locationPreference", zone: "europe-west1-d" },
+    //       pricingPlan: "PER_USE",
+    //       replicationType: "SYNCHRONOUS",
+    //       settingsVersion: "1",
+    //       storageAutoResize: true,
+    //       storageAutoResizeLimit: "0",
+    //       tier: "db-custom-1-4096"
+    //     },
+    //     sqlNetworkArchitecture: "NEW_NETWORK_ARCHITECTURE",
+    //     state: "RUNNABLE"
+    //   }
   });
 
   await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:${project.number}@cloudbuild.gserviceaccount.com --role roles/cloudsql.client`.quiet();
@@ -188,7 +304,8 @@ const createSqlInstance = async () => {
 const createDatabase = async (name) => {
   const progress = $.progress(`Creating ${name} database and user`);
   await progress.with(async () => {
-    const db = await $`gcloud sql databases create ${name} --instance=${instanceId} --format=json`.json();
+    const db = await $`gcloud sql databases create ${name} --instance=${project.dbInstance} --format=json`.json();
+
     console.log(db);
     // TODO: CREATE USER
   });
@@ -239,8 +356,36 @@ const createSecrets = async () => {
   for (const account of accounts) {
     await $`gcloud projects add-iam-policy-binding ${project.id} --member=serviceAccount:${account} --role=roles/secretmanager.secretAccessor`.quiet();
   }
-}
+};
 
+const createCloudRun = async () => {
+  $.logStep('Creating a Cloud Run service');
 
+  const service = await $.prompt({
+    message: 'Service name',
+    default: 'production',
+    noClear: true,
+  });
+
+  const env = envVars.map((item) => `--set-env-vars "${item.key}=${item.value}"`);
+  const sec = secrets.map((item) => `--set-secrets ${item.key}=${item.key}:1`);
+
+  const lines = [
+    `gcloud run deploy ${service}`,
+    `--source .`,
+    `--project=${project.id}`,
+    `--region=${options.region}`,
+    `--allow-unauthenticated`,
+    ...env,
+    ...sec,
+    `--format=json`
+  ];
+
+  const progress = $.progress('Deploying the service');
+  await progress.with(async () => {
+    const result = await $`${lines.join(' ')}`.json();
+    console.log(result);
+  });
+};
 
 await run();
