@@ -17,10 +17,10 @@ New Flutter project:
 deno run -A https://raw.githubusercontent.com/scoutredeem/scaffolding/main/flutter/init.js
 ```
 
-Documentation site for project handbook:
+New GCP project:
 
 ```
-svn export https://github.com/scoutredeem/scaffolding.git/trunk/docs
+deno run -A https://raw.githubusercontent.com/scoutredeem/scaffolding/main/ops/gcp.js [flags]
 ```
 
 Documentation folder for a single repo project:

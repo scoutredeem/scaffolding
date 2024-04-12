@@ -62,12 +62,17 @@ let cloudRun = '';
 
 const run = async () => {
   try {
+    if (Deno.args.includes('--help')) {
+      printHelp();
+      return;
+    }
+
     await preflight();
     const config = await selectConfig();
     if (!config) {
       await createConfig();
     }
-    // await authenticate();
+    await authenticate();
     await setAccount();
     await selectProject();
     if (!project.id) {
@@ -99,22 +104,36 @@ const run = async () => {
   report();
 };
 
-const selectProject = async () => {
-  const projects = await $`gcloud projects list --format=json`.json();
-  if (projects.length === 0) return;
+const printHelp = () => {
+  $.log('Usage: gcp [options]');
+  $.log('Options can be:');
+  $.log('--help     : print this help message');
+  $.log('--skip-auth: the cli is already authenticated');
+}
 
-  const newProject = 'Create a new project';
-  const option = await $.select({
-    message: 'Select an existing project or create a new one',
-    options: [...projects.map((project) => project.name), newProject],
-  });
+const preflight = async () => {
+  try {
+    await $`which gcloud`.text();
+  } catch (error) {
+    throw new Error('gcloud is not installed.');
+  }
 
-  if (option == projects.length) return;
+  let lines = [];
+  try {
+    lines = await $`cat .env.example`.lines();
+  } catch (error) {
+    throw new Error('No .env.example file found in this folder');
+  }
 
-  const selectedProject = projects[option];
-  project.id = selectedProject.projectId;
-  project.name = selectedProject.name;
-  project.number = selectedProject.projectNumber;
+  if (lines.length < 2) {
+    throw new Error('.env.example file looks empty');
+  }
+
+  try {
+    await $`cat Dockerfile`.lines();
+  } catch (error) {
+    throw new Error('No Dockerfile found in this folder');
+  }
 };
 
 const selectConfig = async () => {
@@ -156,24 +175,11 @@ const createConfig = async () => {
   await $`gcloud config configurations activate ${project.id}`.quiet();
 };
 
-const createProject = async () => {
-  // https://cloud.google.com/sdk/gcloud/reference/projects/create
-
-  const fresh =
-    await $`gcloud projects create ${project.id} --name="${project.name}" --format=json`.json();
-  // {
-  //     "@type": "type.googleapis.com/google.cloudresourcemanager.v1.Project",
-  //     createTime: "2024-03-19T20:00:11.417080Z",
-  //     lifecycleState: "ACTIVE",
-  //     name: "'Temporary Test'",
-  //     parent: { id: "877170385875", type: "organization" },
-  //     projectId: "temporary-test-082",
-  //     projectNumber: "963664183424"
-  // }
-  project.number = fresh.projectNumber;
-};
-
 const authenticate = async () => {
+  if (Deno.args.includes('--skip-auth')) {
+    return;
+  }
+
   $.log('Log in with your partner services account');
   try {
     await $`gcloud auth login`;
@@ -181,6 +187,7 @@ const authenticate = async () => {
     throw new Error('Failed to authenticate with gcloud.');
   }
 };
+
 
 const setAccount = async () => {
   $.log('Checking the account and billing');
@@ -202,28 +209,39 @@ const setAccount = async () => {
   $.logGroupEnd();
 };
 
-const preflight = async () => {
-  try {
-    await $`which gcloud`.text();
-  } catch (error) {
-    throw new Error('gcloud is not installed.');
-  }
+const selectProject = async () => {
+  const projects = await $`gcloud projects list --format=json`.json();
+  if (projects.length === 0) return;
 
-  let lines = [];
-  try {
-    lines = await $`cat .env.example`.lines();
-  } catch (error) {
-    throw new Error('No .env.example file found in this folder');
-  }
-  if (lines.length < 2) {
-    throw new Error('.env.example file looks empty');
-  }
+  const newProject = 'Create a new project';
+  const option = await $.select({
+    message: 'Select an existing project or create a new one',
+    options: [...projects.map((project) => project.name), newProject],
+  });
 
-  try {
-    await $`cat Dockerfile`.lines();
-  } catch (error) {
-    throw new Error('No Dockerfile found in this folder');
-  }
+  if (option == projects.length) return;
+
+  const selectedProject = projects[option];
+  project.id = selectedProject.projectId;
+  project.name = selectedProject.name;
+  project.number = selectedProject.projectNumber;
+};
+
+const createProject = async () => {
+  // https://cloud.google.com/sdk/gcloud/reference/projects/create
+
+  const fresh =
+    await $`gcloud projects create ${project.id} --name="${project.name}" --format=json`.json();
+  // {
+  //     "@type": "type.googleapis.com/google.cloudresourcemanager.v1.Project",
+  //     createTime: "2024-03-19T20:00:11.417080Z",
+  //     lifecycleState: "ACTIVE",
+  //     name: "'Temporary Test'",
+  //     parent: { id: "877170385875", type: "organization" },
+  //     projectId: "temporary-test-082",
+  //     projectNumber: "963664183424"
+  // }
+  project.number = fresh.projectNumber;
 };
 
 const populateConfig = async () => {
@@ -280,6 +298,25 @@ const enableAPIs = async () => {
   $.logGroupEnd();
 };
 
+const selectSqlInstance = async () => {
+  const instances = await $`gcloud sql instances list --format=json`.json();
+  if (instances.length === 0) return null;
+
+  const newProject = 'Create a new instance';
+  const option = await $.select({
+    message: 'Select an existing Postgres instance or create a new one',
+    options: [...instances.map((instance) => instance.name), newProject],
+  });
+
+  if (option == instances.length) return null;
+
+  const selectedInstance = instances[option];
+  database.instance = selectedInstance.name;
+  database.connection = selectedInstance.connectionName;
+  database.address = selectedInstance.ipAddresses[0].ipAddress;
+  return selectedInstance;
+}
+
 const createSqlInstance = async () => {
   // https://cloud.google.com/sdk/gcloud/reference/sql/instances/create
   const result = await $.confirm('Do you want to create a SQL instance?');
@@ -318,33 +355,6 @@ const createSqlInstance = async () => {
   $.logGroupEnd();
 };
 
-const setCloudBuildAccess = async () => {
-  $.log("Setting Cloud Build access");
-
-  $.logGroup();
-  await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:${project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
-  $.logLight(`✓ access granted to secrets and database`);
-  $.logGroupEnd();
-};
-
-const selectSqlInstance = async () => {
-  const instances = await $`gcloud sql instances list --format=json`.json();
-  if (instances.length === 0) return null;
-
-  const newProject = 'Create a new instance';
-  const option = await $.select({
-    message: 'Select an existing Postgres instance or create a new one',
-    options: [...instances.map((instance) => instance.name), newProject],
-  });
-
-  if (option == instances.length) return null;
-
-  const selectedInstance = instances[option];
-  database.instance = selectedInstance.name;
-  database.connection = selectedInstance.connectionName;
-  database.address = selectedInstance.ipAddresses[0].ipAddress;
-  return selectedInstance;
-}
 
 const selectDabase = async () => {
   const databases = await $`gcloud sql databases list --instance=${database.instance} --format=json`.json();
@@ -500,6 +510,16 @@ const setCloudRun = async () => {
   // so we dump it in the report for the user to run it manually
   cloudRun = lines.join('\n');
 };
+
+const setCloudBuildAccess = async () => {
+  $.log("Setting Cloud Build access");
+
+  $.logGroup();
+  await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:${project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
+  $.logLight(`✓ access granted to secrets and database`);
+  $.logGroupEnd();
+};
+
 
 const report = () => {
   $.log('');
