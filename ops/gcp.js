@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run
 
-import $ from 'https://deno.land/x/dax/mod.ts';
+import $ from "jsr:@david/dax@0.40.0";
 
 const options = {
   region: 'europe-west1',
@@ -29,30 +29,39 @@ const prodEnvironment = [
   'DATABASE_SSL=true',
 ];
 
+const neededApis = [
+  'run.googleapis.com',
+  'cloudbuild.googleapis.com',
+  'secretmanager.googleapis.com',
+  'sourcerepo.googleapis.com',
+  'iam.googleapis.com',
+  'sqladmin.googleapis.com',
+];
+
 const project = {
   id: '',
   name: '',
   number: '',
   account: '',
-  dbInstance: '',
 };
 
 const database = {
   instance: '',
   connection: '',
   name: '',
-  user: '',
-  password: '',
   address: '',
+  user: 'postgres',
+  password: '',
 }
 
 const envVars = [];
 const secrets = [];
 
+let enabledApis = [];
+let cloudRun = '';
+
 const run = async () => {
   try {
-    await getEnvironment();
-
     await preflight();
     const config = await selectConfig();
     if (!config) {
@@ -64,8 +73,8 @@ const run = async () => {
     if (!project.id) {
       await createProject();
     }
-    // await populateConfig();
-    // await enableAPIs();
+    await populateConfig();
+    await enableAPIs();
 
     await selectSqlInstance();
     if (!database.instance) {
@@ -73,7 +82,6 @@ const run = async () => {
     }
 
     if (database.instance) {
-      await setSqlAccess();
       await selectDabase();
       if (!database.name) {
         await createDatabase();
@@ -82,13 +90,13 @@ const run = async () => {
 
     await getEnvironment();
     await createSecrets();
-    await createCloudRun();
+    await setCloudRun();
   } catch (error) {
     $.logError(error.message);
     return;
   }
 
-  $.logStep('Done!');
+  report();
 };
 
 const selectProject = async () => {
@@ -221,37 +229,55 @@ const preflight = async () => {
 const populateConfig = async () => {
   $.log('Setting up a cli configuration');
   $.logGroup();
-  await $`gcloud config set project ${project.id}`.quiet();
-  $.logLight(`✓ project name set to ${project.id}`);
-  await $`gcloud config set account ${project.account}`.quiet();
-  $.logLight(`✓ project account set to ${project.account}`);
-  $.logLight(`enabling compute API ...`);
-  await $`gcloud services enable compute.googleapis.com`.quiet();
-  $.logLight(`✓ compute API enabled`);
-  await $`gcloud config set compute/region ${options.region}`.quiet();
-  $.logLight(`✓ project region set to ${options.region}`);
-  await $`gcloud config set compute/zone ${options.zone}`.quiet();
-  $.logLight(`✓ project zone set to ${options.zone}`);
+  $.logLight(`checking enabled services ...`);
+  const enabled = await $`gcloud services list --enabled --format=json`.json();
+  enabledApis = enabled.map((service) => service.config.name);
+
+  const active = await $`gcloud config list --format=json`.json();
+  if (active.core.project !== project.id) {
+    await $`gcloud config set project ${project.id}`.quiet();
+    $.logLight(`✓ project name set to ${project.id}`);
+  }
+
+  if (active.core.account !== project.account) {
+    await $`gcloud config set account ${project.account}`.quiet();
+    $.logLight(`✓ project account set to ${project.account}`);
+  }
+
+  if (!enabledApis.includes('compute.googleapis.com')) {
+    $.logLight(`enabling compute API ...`);
+    await $`gcloud services enable compute.googleapis.com`.quiet();
+    $.logLight(`✓ compute API enabled`);
+
+    const account = `${project.number}-compute@developer.gserviceaccount.com`;
+    await $`gcloud projects add-iam-policy-binding ${project.id} --member=serviceAccount:${account} --role=roles/secretmanager.secretAccessor`;
+    $.logLight(`✓ ${account} authorized to access secrets`);
+  }
+
+  if (active.compute?.region !== options.region) {
+    await $`gcloud config set compute/region ${options.region}`.quiet();
+    $.logLight(`✓ project region set to ${options.region}`);
+  }
+  if (active.compute?.zone !== options.zone) {
+    await $`gcloud config set compute/zone ${options.zone}`.quiet();
+    $.logLight(`✓ project zone set to ${options.zone}`);
+  }
   $.logGroupEnd();
 };
 
 const enableAPIs = async () => {
   $.log('Enabling necessary APIs');
   $.logGroup();
-  await $`gcloud services enable run.googleapis.com`;
-  $.logLight(`✓ Cloud Run enabled`);
-  await $`gcloud services enable cloudbuild.googleapis.com`;
-  $.logLight(`✓ Cloud Build enabled`);
-  await $`gcloud services enable secretmanager.googleapis.com`;
-  $.logLight(`✓ Secret Manager enabled`);
-  await $`gcloud services enable sourcerepo.googleapis.com`;
-  $.logLight(`✓ Source Repo enabled`);
-  await $`gcloud services enable iam.googleapis.com`;
-  $.logLight(`✓ IAM enabled`);
-  await $`gcloud services enable sqladmin.googleapis.com`;
-  $.logLight(`✓ SQL enabled`);
-  $.logGroupEnd();
 
+  for (const api of neededApis) {
+    if (enabledApis.includes(api)) {
+      $.logLight(`✓ ${api} is enabled`);
+    } else {
+      await $`gcloud services enable ${api}`;
+      $.logLight(`✓ ${api} enabled`);
+    }
+  }
+  $.logGroupEnd();
 };
 
 const createSqlInstance = async () => {
@@ -273,10 +299,17 @@ const createSqlInstance = async () => {
 
   $.log("Creating a Cloud SQL instance");
   $.logGroup();
-  await $`gcloud services enable sql-component.googleapis.com`.quiet();
-  $.logLight(`✓ SQL component enabled`);
-  await $`gcloud services enable sqladmin.googleapis.com`.quiet();
-  $.logLight(`✓ SQL admin enabled`);
+
+  const sqlApis = ['sql-component.googleapis.com', 'sqladmin.googleapis.com'];
+  for (const api of sqlApis) {
+    if (enabledApis.includes(api)) {
+      $.logLight(`✓ ${api} is enabled`);
+    } else {
+      await $`gcloud services enable ${api}`.quiet();
+      $.logLight(`✓ ${api} enabled`);
+    }
+  }
+
   $.logLight(`Creating the instance. This takes a few minutes.`);
   const instance = await $`gcloud sql instances create ${database.instance} --database-version=${options.dbEngine} --cpu=${options.dbCpu} --memory=${options.dbMemory} --zone=${options.zone} --root-password=${rootPassword} --format=json`.json();
   database.connection = instance.connectionName;
@@ -285,11 +318,12 @@ const createSqlInstance = async () => {
   $.logGroupEnd();
 };
 
-const setSqlAccess = async () => {
-  $.log("Giving Cloud Build access to the database");
+const setCloudBuildAccess = async () => {
+  $.log("Setting Cloud Build access");
+
   $.logGroup();
-  await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:${project.number}@cloudbuild.gserviceaccount.com --role roles/cloudsql.client`.quiet();
-  $.logLight(`✓ access granted`);
+  await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:${project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
+  $.logLight(`✓ access granted to secrets and database`);
   $.logGroupEnd();
 };
 
@@ -307,6 +341,8 @@ const selectSqlInstance = async () => {
 
   const selectedInstance = instances[option];
   database.instance = selectedInstance.name;
+  database.connection = selectedInstance.connectionName;
+  database.address = selectedInstance.ipAddresses[0].ipAddress;
   return selectedInstance;
 }
 
@@ -382,7 +418,7 @@ const getEnvironment = async () => {
 };
 
 const looksSecretive = (key) => {
-  const secretive = ['PASSWORD', 'SECRET', 'KEY', 'TOKEN', 'SALT', 'HASH', 'CRYPT', 'PRIVATE', 'CERT', 'PEM', 'SSL', 'AUTH', 'PASS', 'PIN', 'CODE', 'CIPHER',];
+  const secretive = ['PASSWORD', 'SECRET', 'KEY', 'TOKEN', 'SALT', 'HASH', 'PRIVATE', 'CERT', 'PEM', 'AUTH', 'PASS', 'PIN', 'CODE',];
   return secretive.some((item) => key.toUpperCase().includes(item));
 }
 
@@ -420,52 +456,90 @@ const createSecrets = async () => {
   $.log('Creating secrets');
   $.logGroup();
 
+  $.logLight(`fetching secrets`);
+  const all = await $`gcloud secrets list --format=json`.json();
+
   for (const secret of secrets) {
-    await $`gcloud secrets create ${secret.key} --data-file=-`.stdin(secret.value);
+    if (all.find((item) => item.name === `projects/${project.number}/secrets/${secret.key}`)) {
+      $.logLight(`✓ ${secret.key} already exists`);
+      continue;
+    }
+    $.logLight(`creating ${secret.key} ...`);
+    await $`echo -n ${secret.value} | gcloud secrets create ${secret.key} --data-file=-`;
     $.logLight(`✓ ${secret.key} created`);
   }
 
-  // Authorise the compute and cloud build service accounts to access our secrets:
-  const accounts = [
-    `${project.number}-compute@developer.gserviceaccount.com`,
-    `${project.number}@cloudbuild.gserviceaccount.com`,
-  ];
-
-  for (const account of accounts) {
-    await $`gcloud projects add-iam-policy-binding ${project.id} --member=serviceAccount:${account} --role=roles/secretmanager.secretAccessor`.quiet();
-    $.logLight(`✓ ${account} authorized`);
-  }
   $.logGroupEnd();
 };
 
-const createCloudRun = async () => {
-  $.log('Creating a Cloud Run service');
+const setCloudRun = async () => {
+  const result = await $.confirm('Do you want to create a Cloud Run service?');
+  if (!result) return;
 
   const service = await $.prompt({
-    message: 'Service name',
+    message: 'Cloud Run service name',
     default: 'production',
     noClear: true,
   });
 
-  const env = envVars.map((item) => `--set-env-vars "${item.key}=${item.value}"`);
-  const sec = secrets.map((item) => `--set-secrets ${item.key}=${item.key}:1`);
+  const env = envVars.map((item) => `--set-env-vars "${item.key}=${item.value}" \\`);
+  const sec = secrets.map((item) => `--set-secrets ${item.key}=${item.key}:1 \\`);
 
   const lines = [
-    `gcloud run deploy ${service}`,
-    `--source .`,
-    `--project=${project.id}`,
-    `--region=${options.region}`,
-    `--allow-unauthenticated`,
+    `gcloud run deploy ${service} \\`,
+    `--source . \\`,
+    `--project=${project.id} \\`,
+    `--region=${options.region} \\`,
+    `--set-cloudsql-instances=${database.instance} \\`,
+    `--allow-unauthenticated \\`,
     ...env,
     ...sec,
-    `--format=json`
   ];
 
-  const progress = $.progress('Deploying the service');
-  await progress.with(async () => {
-    const result = await $`${lines.join(' ')}`.json();
-    console.log(result);
-  });
+  // the command is to long to run from the script 
+  // so we dump it in the report for the user to run it manually
+  cloudRun = lines.join('\n');
 };
+
+const report = () => {
+  $.log('');
+  $.logWarn('Project');
+  $.logGroup();
+  $.log(`name: ${project.name}`);
+  $.log(`id: ${project.id}`);
+  $.log(`number: ${project.number}`);
+  $.log(`account: ${project.account}`);
+  $.log(`region: ${options.region}`);
+  $.log(`zone: ${options.zone}`);
+  $.logGroupEnd();
+
+  if (database.instance) {
+    $.logWarn('Database');
+    $.logGroup();
+    $.log(`instance: ${database.instance}`);
+    $.log(`connection: ${database.connection}`);
+    $.log(`name: ${database.name}`);
+    $.log(`address: ${database.address}`);
+    $.log(`user: ${database.user}`);
+    $.logGroupEnd();
+  }
+
+  if (cloudRun) {
+    $.logWarn('Cloud Run create command:');
+    $.log(cloudRun);
+  }
+
+  // if (envVars.length > 0) {
+  //   $.logWarn('Environment');
+  //   $.logGroup();
+  //   for (const item of envVars) {
+  //     $.log(`${item.key}: ${item.value}`);
+  //   }
+  //   for (const item of secrets) {
+  //     $.log(`${item.key}: [secret]`);
+  //   }
+  //   $.logGroupEnd();
+  // }
+}
 
 await run();
