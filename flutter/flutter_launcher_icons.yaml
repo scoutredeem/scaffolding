@@ -1,8 +1,14 @@
-flutter_icons:
-  #  image_path: "assets/images/icon-128x128.png"
-  image_path_android: "assets/images/icon-710x599-android.png"
-  image_path_ios: "assets/images/icon-710x599-ios.png"
-  android: true # can specify file name here e.g. "ic_launcher"
-  ios: true # can specify file name here e.g. "My-Launcher-Icon"
-  adaptive_icon_background: "assets/images/christmas-background.png" # only available for Android 8.0 devices and above
-  adaptive_icon_foreground: "assets/images/icon-foreground-432x432.png" # only available for Android 8.0 devices and above
+flutter_launcher_icons:
+  # this should be a 512x512 png image
+  image_path_android: 'assets/store/icon.png'
+  image_path_ios: 'assets/store/icon.png'
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  # 512x512 png image
+  adaptive_icon_background: 'assets/store/icon-background.png'
+  # 512x512 png image with 100px safe zone broder
+  adaptive_icon_foreground: 'assets/store/icon-foreground.png'
+  web:
+    generate: true
+    image_path: 'assets/store/icon.png'
