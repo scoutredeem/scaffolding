@@ -4,9 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 extension ExtendBuildContext on BuildContext {
   AppLocalizations get tr => AppLocalizations.of(this)!;
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
-  double get textScale => MediaQuery.of(this).textScaleFactor;
   double get displayScale => MediaQuery.of(this).devicePixelRatio;
-  bool get isLargeFont => textScale >= 1.3 || displayScale > 3;
   bool get isLTR => Directionality.of(this) == TextDirection.ltr;
 
   Size get size => MediaQuery.of(this).size;

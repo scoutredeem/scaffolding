@@ -58,6 +58,7 @@ const recommendedPackages = [
   'flutter_svg|SVG assets',
   'http|api calls',
   'url_launcher|launching links',
+  'google_fonts|Google Fonts',
 ];
 
 const devPackages = ['flutter_launcher_icons', 'dart_style'];
@@ -117,7 +118,7 @@ const createApp = async () => {
     { default: 'test_app', noClear: true },
   );
 
-  const defaultBundleId = `org.onesheep.${appName}`;
+  const defaultBundleId = `co.scoutredeem.${appName}`;
 
   const org = await $.prompt('Enter reverse domain for bundle id: ', {
     default: defaultBundleId,
