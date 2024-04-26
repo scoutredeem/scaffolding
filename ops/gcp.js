@@ -54,6 +54,11 @@ const database = {
   password: '',
 }
 
+const buildConnection = {
+  name: 'github',
+  platform: 'github',
+}
+
 const envVars = [];
 const secrets = [];
 
@@ -68,34 +73,45 @@ const run = async () => {
     }
 
     await preflight();
-    const config = await selectConfig();
-    if (!config) {
-      await createConfig();
-    }
-    await authenticate();
-    await setAccount();
-    await selectProject();
-    if (!project.id) {
-      await createProject();
-    }
-    await populateConfig();
-    await enableAPIs();
+    await setProject();
 
-    await selectSqlInstance();
-    if (!database.instance) {
-      await createSqlInstance();
+    const action = await $.select({
+      message: `With project ${project.id}, what do you want to do?`,
+      options: ['Create a cloud run service', 'Create a build trigger', 'Create a secret',],
+    });
+
+    switch (action) {
+      case 0:
+        await selectSqlInstance();
+        if (!database.instance) {
+          await createSqlInstance();
+        }
+
+        if (database.instance) {
+          await selectDabase();
+          if (!database.name) {
+            await createDatabase();
+          }
+        }
+
+        await getEnvironment();
+        await createSecrets();
+        await setCloudRun();
+        break;
+
+      case 1:
+        await createBuildTrigger();
+        break;
+
+      case 2:
+        $.log('Coming soon ...');
+        break;
+
+      default:
+        break;
     }
 
-    if (database.instance) {
-      await selectDabase();
-      if (!database.name) {
-        await createDatabase();
-      }
-    }
 
-    await getEnvironment();
-    await createSecrets();
-    await setCloudRun();
   } catch (error) {
     $.logError(error.message);
     return;
@@ -108,7 +124,7 @@ const printHelp = () => {
   $.log('Usage: gcp [options]');
   $.log('Options can be:');
   $.log('--help     : print this help message');
-  $.log('--skip-auth: the cli is already authenticated');
+  $.log('--skip-auth: the cli is already authenticated, use the active config');
 }
 
 const preflight = async () => {
@@ -117,7 +133,44 @@ const preflight = async () => {
   } catch (error) {
     throw new Error('gcloud is not installed.');
   }
+};
 
+
+const setProject = async () => {
+  if (Deno.args.includes('--skip-auth')) {
+    $.log('Setting the active project');
+    $.logGroup();
+    const configs = await $`gcloud config configurations list --format=json`.json();
+    const active = configs.find((config) => config.is_active);
+    if (active) {
+      project.id = active.properties.core.project;
+      project.account = active.properties.core.account;
+      $.logLight(`fetching ${project.id}`);
+      const projects = await $`gcloud projects list --format=json`.json();
+      const selectedProject = projects.find((item) => item.projectId === project.id);
+      project.name = selectedProject.name;
+      project.number = selectedProject.projectNumber;
+      $.logLight(`using ${project.name}`);
+      $.logGroupEnd();
+      return;
+    }
+
+    const config = await selectConfig();
+    if (!config) {
+      await createConfig();
+    }
+    await authenticate();
+    await setAccount();
+    await selectProject();
+    if (!project.id) {
+      await createProject();
+    }
+    await populateConfig();
+    await enableAPIs();
+  }
+}
+
+const preflightCloudRun = async () => {
   let lines = [];
   try {
     lines = await $`cat .env.example`.lines();
@@ -156,7 +209,7 @@ const selectConfig = async () => {
 };
 
 const createConfig = async () => {
-  $.logStep('Creating a new project');
+  $.log('Creating a new project');
   project.name = await $.prompt({
     message: 'Project name',
     default: 'Story App',
@@ -176,10 +229,6 @@ const createConfig = async () => {
 };
 
 const authenticate = async () => {
-  if (Deno.args.includes('--skip-auth')) {
-    return;
-  }
-
   $.log('Log in with your partner services account');
   try {
     await $`gcloud auth login`;
@@ -297,6 +346,33 @@ const enableAPIs = async () => {
   }
   $.logGroupEnd();
 };
+
+const setConnection = async () => {
+  // assuming one connection per project
+  const connections = await $`gcloud builds connections list --region=${options.region} --format=json`.json();
+  if (connections.length > 0) {
+    console.log(connections[0]);
+  } else {
+    $.log('Creating a connection to github');
+    $.logGroup();
+    // grant Cloud Build P4SA access to store the connection token
+    await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:service-${project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com --role=roles/secretmanager.admin`.quiet();
+    $.logLight(`✓ access granted to store the connection token`);
+    await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:${project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
+    $.logLight(`✓ access granted to read secrets and migrate the database`);
+    $.logGroupEnd();
+    await $`gcloud builds connections create ${buildConnection.platform} ${buildConnection.name}  --project=${project.id} --region=${options.region}`;
+  }
+}
+
+const createBuildTrigger = async () => {
+  await setConnection();
+
+  $.log('Creating a Cloud Build trigger');
+  $.logGroup();
+  $.logLight(`using the connection to create a trigger`);
+  $.logGroupEnd();
+}
 
 const selectSqlInstance = async () => {
   const instances = await $`gcloud sql instances list --format=json`.json();
@@ -510,16 +586,6 @@ const setCloudRun = async () => {
   // so we dump it in the report for the user to run it manually
   cloudRun = lines.join('\n');
 };
-
-const setCloudBuildAccess = async () => {
-  $.log("Setting Cloud Build access");
-
-  $.logGroup();
-  await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:${project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
-  $.logLight(`✓ access granted to secrets and database`);
-  $.logGroupEnd();
-};
-
 
 const report = () => {
   $.log('');
