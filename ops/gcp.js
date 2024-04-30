@@ -104,7 +104,7 @@ const run = async () => {
         break;
 
       case 2:
-        $.log('Coming soon ...');
+        await createNewSecret();
         break;
 
       default:
@@ -473,6 +473,15 @@ const createDatabase = async () => {
   // const result = await $`gcloud sql users create ${database.user} --instance=${database.instance} --password=${database.password} --format=json`.json();
 };
 
+const loadEnvVars = async () => {
+  try {
+    const lines = await $`cat .env.example`.lines();
+    return lines;
+  } catch (error) {
+    return [];
+  }
+};
+
 const getEnvironment = async () => {
   $.log('Collecting the environment variables');
 
@@ -483,7 +492,7 @@ const getEnvironment = async () => {
 
   const ignoreList = prodDefaults.filter((item) => !item.value).map((item) => item.key);
 
-  const pairs = await $`cat .env.example`.lines();
+  const pairs = await loadEnvVars();
   for (const pair of pairs) {
     const [key, start] = pair.split('=');
     if (!key || key[0] === '#') continue;
@@ -551,11 +560,48 @@ const createSecrets = async () => {
       continue;
     }
     $.logLight(`creating ${secret.key} ...`);
-    await $`echo -n ${secret.value} | gcloud secrets create ${secret.key} --data-file=-`;
+    await $`echo ${secret.value} | gcloud secrets create ${secret.key} --data-file=-`;
     $.logLight(`✓ ${secret.key} created`);
   }
 
   $.logGroupEnd();
+};
+
+const createNewSecret = async () => {
+  $.log('\nFetching existing secrets');
+  $.logGroup();
+  const all = await $`gcloud secrets list --format=json`.json();
+  all.forEach((item) => {
+    const parts = item.name.split('secrets/');
+    $.logLight(parts[1]);
+  });
+  $.logGroupEnd();
+
+  $.log('\nCreate new secrets. Enter an empty key to stop.\n');
+
+  let key = '';
+  let value = '';
+
+  do {
+    key = await $.prompt({
+      message: 'key',
+      noClear: true,
+    });
+
+    if (!key) break;
+
+    value = await $.prompt({
+      message: 'value',
+      noClear: true,
+    });
+
+    if (!value) break;
+
+    $.log(`creating ${key} ...`);
+    await $`echo ${value} | gcloud secrets create ${key} --data-file=-`;
+    $.logStep(`✓ ${key} created\n`);
+  } while (true);
+
 };
 
 const setCloudRun = async () => {
