@@ -117,9 +117,9 @@ const createApp = async () => {
     { default: 'test_app', noClear: true },
   );
 
-  const defaultBundleId = `org.onesheep.${appName}`;
+  const defaultBundleId = 'co.scoutredeem';
 
-  const org = await $.prompt('Enter reverse domain for bundle id: ', {
+  const org = await $.prompt('Enter reverse org domain: ', {
     default: defaultBundleId,
     noClear: true,
   });
@@ -174,7 +174,9 @@ const installPackages = async () => {
 };
 
 const installDevPackages = async () => {
-  await $`flutter pub add --dev ${devPackages.join(' ')}`;
+  for (const p of devPackages) {
+    await $`flutter pub add --dev ${p}`;
+  }
 };
 
 const fetchTemplates = async () => {
