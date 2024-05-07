@@ -142,44 +142,47 @@ const setProject = async () => {
     $.logGroup();
     const configs = await $`gcloud config configurations list --format=json`.json();
     const active = configs.find((config) => config.is_active);
-    if (active) {
-      project.id = active.properties.core.project;
-      project.account = active.properties.core.account;
-      $.logLight(`fetching ${project.id}`);
-      const projects = await $`gcloud projects list --format=json`.json();
-      const selectedProject = projects.find((item) => item.projectId === project.id);
-      project.name = selectedProject.name;
-      project.number = selectedProject.projectNumber;
-      $.logLight(`using ${project.name}`);
-      $.logGroupEnd();
-      return;
+    if (!active) {
+      throw new Error('No active gcloud configuration found.');
     }
 
-    const config = await selectConfig();
-    if (!config) {
-      await createConfig();
-    }
-    await authenticate();
-    await setAccount();
-    await selectProject();
-    if (!project.id) {
-      await createProject();
-    }
-    await populateConfig();
-    await enableAPIs();
+    project.id = active.properties.core.project;
+    project.account = active.properties.core.account;
+    $.logLight(`fetching ${project.id}`);
+    const projects = await $`gcloud projects list --format=json`.json();
+    const selectedProject = projects.find((item) => item.projectId === project.id);
+    project.name = selectedProject.name;
+    project.number = selectedProject.projectNumber;
+    $.logLight(`using ${project.name}`);
+    $.logGroupEnd();
+    return;
   }
+
+
+  const config = await selectConfig();
+  if (!config) {
+    await createConfig();
+  }
+  await authenticate();
+  await setAccount();
+  await selectProject();
+  if (!project.id) {
+    await createProject();
+  }
+  await populateConfig();
+  await enableAPIs();
 }
 
 const preflightCloudRun = async () => {
   let lines = [];
   try {
-    lines = await $`cat .env.example`.lines();
+    lines = await $`cat .env`.lines();
   } catch (error) {
-    throw new Error('No .env.example file found in this folder');
+    throw new Error('No .env file found in this folder');
   }
 
   if (lines.length < 2) {
-    throw new Error('.env.example file looks empty');
+    throw new Error('.env file looks empty');
   }
 
   try {
@@ -475,7 +478,7 @@ const createDatabase = async () => {
 
 const loadEnvVars = async () => {
   try {
-    const lines = await $`cat .env.example`.lines();
+    const lines = await $`cat .env`.lines();
     return lines;
   } catch (error) {
     return [];
