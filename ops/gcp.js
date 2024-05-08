@@ -54,11 +54,6 @@ const database = {
   password: '',
 }
 
-const buildConnection = {
-  name: 'github',
-  platform: 'github',
-}
-
 const envVars = [];
 const secrets = [];
 
@@ -100,7 +95,8 @@ const run = async () => {
         break;
 
       case 1:
-        await createBuildTrigger();
+        const build = new Build(project);
+        await build.createTrigger();
         break;
 
       case 2:
@@ -349,33 +345,6 @@ const enableAPIs = async () => {
   }
   $.logGroupEnd();
 };
-
-const setConnection = async () => {
-  // assuming one connection per project
-  const connections = await $`gcloud builds connections list --region=${options.region} --format=json`.json();
-  if (connections.length > 0) {
-    console.log(connections[0]);
-  } else {
-    $.log('Creating a connection to github');
-    $.logGroup();
-    // grant Cloud Build P4SA access to store the connection token
-    await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:service-${project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com --role=roles/secretmanager.admin`.quiet();
-    $.logLight(`✓ access granted to store the connection token`);
-    await $`gcloud projects add-iam-policy-binding ${project.id} --member serviceAccount:${project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
-    $.logLight(`✓ access granted to read secrets and migrate the database`);
-    $.logGroupEnd();
-    await $`gcloud builds connections create ${buildConnection.platform} ${buildConnection.name}  --project=${project.id} --region=${options.region}`;
-  }
-}
-
-const createBuildTrigger = async () => {
-  await setConnection();
-
-  $.log('Creating a Cloud Build trigger');
-  $.logGroup();
-  $.logLight(`using the connection to create a trigger`);
-  $.logGroupEnd();
-}
 
 const selectSqlInstance = async () => {
   const instances = await $`gcloud sql instances list --format=json`.json();
@@ -675,6 +644,112 @@ const report = () => {
   //   }
   //   $.logGroupEnd();
   // }
+}
+
+class Build {
+  static buildConnection = {
+    name: 'github',
+    platform: 'github',
+  }
+
+  constructor(project) {
+    this.project = project;
+    this.connection = null;
+    this.repository = null;
+  }
+
+  async setConnection() {
+    // assuming one connection per project
+    const connections = await $`gcloud builds connections list --region=${options.region} --format=json`.json();
+    if (connections.length > 0) {
+      this.connection = connections[0];
+      return;
+    }
+
+    $.log('Creating a connection to github');
+    $.logGroup();
+    // grant Cloud Build P4SA access to store the connection token
+    await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:service-${this.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com --role=roles/secretmanager.admin`.quiet();
+    $.logLight(`✓ access granted to store the connection token`);
+    await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:${this.project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
+    $.logLight(`✓ access granted to read secrets and migrate the database`);
+    $.logGroupEnd();
+    this.connection = await $`gcloud builds connections create ${buildConnection.platform} ${buildConnection.name} --project=${this.project.id} --region=${options.region}`;
+  }
+
+  async setRepo() {
+    const repos = await $`gcloud builds repositories list --connection=${this.connection.name} --format=json`.json();
+    if (repos.length === 0) {
+      await this.createRepo();
+      return;
+    }
+
+    const newRepo = 'Create a new repository';
+    const option = await $.select({
+      message: 'Select a repository or create a new one',
+      options: [...repos.map((repo) => repo.name), newRepo],
+    });
+
+    if (option === repos.length) {
+      await this.createRepo();
+    } else {
+      this.repository = repos[option];
+    }
+  }
+
+  async createRepo() {
+    const url = await $.prompt({
+      message: 'Repository URL',
+      noClear: true,
+    });
+
+    const name = await $.prompt({
+      message: 'Repository name',
+      default: url.split('/').pop(),
+      noClear: true,
+    });
+
+    $.log('\nCreating a repository');
+    $.logGroup();
+    $.logLight(`using the connection to create a repository`);
+    this.repository = await $`gcloud builds repositories create ${name} --remote-uri=${url} --connection=${this.connection.name} --region=${options.region} --format=json`.json();
+    console.log(this.repository);
+    $.logLight(`✓ repository created`);
+    $.logGroupEnd();
+  }
+
+  async createTrigger() {
+    await this.setConnection();
+    await this.setRepo();
+
+    $.log('\nFetching existing triggers');
+    const triggers = await $`gcloud builds triggers list --format=json`.json();
+    $.logGroup();
+    triggers.forEach((trigger) => {
+      $.logLight(trigger.name);
+    });
+    $.logGroupEnd();
+
+    // https://cloud.google.com/sdk/gcloud/reference/builds/triggers/create/github
+
+    const name = await $.prompt({
+      message: 'Trigger name',
+      default: 'production-cd',
+      noClear: true,
+    });
+
+    const description = await $.prompt({
+      message: 'Description',
+      default: 'Build and deploy to Cloud Run service production on push to "^main$"',
+      noClear: true,
+    });
+
+    $.log('Creating a Cloud Build trigger');
+    $.logGroup();
+    $.logLight(`using the connection to create a trigger`);
+    $.logGroupEnd();
+  }
+
 }
 
 await run();
