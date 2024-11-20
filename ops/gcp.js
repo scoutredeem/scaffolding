@@ -97,6 +97,7 @@ const run = async () => {
       case 1:
         const build = new Build(project);
         await build.createTrigger();
+
         break;
 
       case 2:
@@ -295,9 +296,6 @@ const createProject = async () => {
 const populateConfig = async () => {
   $.log('Setting up a cli configuration');
   $.logGroup();
-  $.logLight(`checking enabled services ...`);
-  const enabled = await $`gcloud services list --enabled --format=json`.json();
-  enabledApis = enabled.map((service) => service.config.name);
 
   const active = await $`gcloud config list --format=json`.json();
   if (active.core.project !== project.id) {
@@ -309,6 +307,10 @@ const populateConfig = async () => {
     await $`gcloud config set account ${project.account}`.quiet();
     $.logLight(`✓ project account set to ${project.account}`);
   }
+
+  $.logLight(`checking enabled services ...`);
+  const enabled = await $`gcloud services list --enabled --format=json`.json();
+  enabledApis = enabled.map((service) => service.config.name);
 
   if (!enabledApis.includes('compute.googleapis.com')) {
     $.logLight(`enabling compute API ...`);
@@ -669,12 +671,20 @@ class Build {
     $.log('Creating a connection to github');
     $.logGroup();
     // grant Cloud Build P4SA access to store the connection token
-    await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:service-${this.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com --role=roles/secretmanager.admin`.quiet();
+
+    // can't be .quiet() because it prompts for input:
+    // [1] EXPRESSION = request.time < timestamp("2023-09-27T14:48:51.537Z"), TITLE = cloudbuild - connection - setup
+    // [2] None
+    // [3] Specify a new condition
+    // The policy contains bindings with conditions, so specifying a condition is required when adding a binding.Please specify a condition.:
+    // await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:service-${this.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com --role=roles/secretmanager.admin`.quiet();
+    await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:service-${this.project.number}@gcp-sa-cloudbuild.iam.gserviceaccount.com --role=roles/secretmanager.admin`;
     $.logLight(`✓ access granted to store the connection token`);
-    await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:${this.project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
+    // await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:${this.project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`.quiet();
+    await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:${this.project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`;
     $.logLight(`✓ access granted to read secrets and migrate the database`);
     $.logGroupEnd();
-    this.connection = await $`gcloud builds connections create ${buildConnection.platform} ${buildConnection.name} --project=${this.project.id} --region=${options.region}`;
+    this.connection = await $`gcloud builds connections create ${Build.buildConnection.platform} ${Build.buildConnection.name} --project=${this.project.id} --region=${options.region}`;
   }
 
   async setRepo() {
@@ -718,6 +728,17 @@ class Build {
     $.logGroupEnd();
   }
 
+  async pickService() {
+    const services = await $`gcloud run services list --platform=managed --format=json`.json();
+
+    const name = await $.select({
+      message: 'What service should be deployed?',
+      options: services.map((service) => service.metadata.name),
+    })
+
+    return name;
+  }
+
   async createTrigger() {
     await this.setConnection();
     await this.setRepo();
@@ -730,17 +751,50 @@ class Build {
     });
     $.logGroupEnd();
 
+    this.triggerType = await $.select({
+      message: `What type of build trigger is needed?`,
+      options: [
+        'CD - deploy to Cloud Run',
+        'CI - run tests on new pull requests',
+      ],
+    });
+
+    const defaults = {
+      name: '',
+      description: '',
+      branch: ''
+    };
+
+    switch (this.triggerType) {
+      case 0:
+        const service = await this.pickService();
+        // May only contain alphanumeric characters and dashes
+        defaults.name = `cd-${service}`;
+        defaults.description = `Build and deploy to Cloud Run service ${service} on push to "^main$"`;
+        defaults.branch = '^main$';
+        break;
+
+      case 1:
+        defaults.name = `ci`;
+        defaults.description = `Continuous integration script to run tests on any pull request`;
+        defaults.branch = '^develop$';
+        break;
+
+      default:
+        return;
+    }
+
     // https://cloud.google.com/sdk/gcloud/reference/builds/triggers/create/github
 
     const name = await $.prompt({
       message: 'Trigger name',
-      default: 'production-cd',
+      default: defaults.name,
       noClear: true,
     });
 
     const description = await $.prompt({
       message: 'Description',
-      default: 'Build and deploy to Cloud Run service production on push to "^main$"',
+      default: defaults.description,
       noClear: true,
     });
 
