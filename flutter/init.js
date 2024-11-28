@@ -26,6 +26,7 @@ const templates = [
   '_meta/.gitignore',
   'test/store_test.dart',
   'test/doubles/store_double.dart',
+  'test/widget_test.dart',
   'lib/main.dart',
   'lib/src/app.dart',
   'lib/src/localization/app_en.arb',
@@ -47,7 +48,7 @@ const packages = [
   'firebase_analytics',
   'firebase_crashlytics',
   'get_it',
-  'watch_it',
+  'signals',
   'go_router',
   'hive',
   'hive_flutter',
@@ -75,6 +76,9 @@ const flutterPlatforms = ['ios', 'android', 'web', 'linux', 'macos', 'windows'];
 
 const templatePath =
   'https://raw.githubusercontent.com/scoutredeem/scaffolding/main/flutter';
+
+// for local testing
+// const templatePath = '/Users/paurakh/projects/scoutredeem/scout-redeem-repos/scaffolding/flutter';
 
 let collectedPackages = [];
 let chosenPackages = [];
@@ -118,7 +122,7 @@ const createApp = async () => {
     { default: 'test_app', noClear: true },
   );
 
-  const defaultBundleId = `co.scoutredeem.${appName}`;
+  const defaultBundleId = `co.scoutredeem`;
 
   const org = await $.prompt('Enter reverse org domain: ', {
     default: defaultBundleId,
@@ -183,7 +187,15 @@ const installDevPackages = async () => {
 const fetchTemplates = async () => {
   for (const template of templates) {
     console.log('Fetching template: ', template);
-    const content = await $`curl -fsSL ${templatePath}/${template}`.text();
+
+    let content = '';
+
+    if (templatePath.startsWith('http')) {  // remote
+      content = await $`curl -fsSL ${templatePath}/${template}`.text();
+    } else {  // local
+      content = await Deno.readTextFile(`${templatePath}/${template}`);
+    }
+
     await Deno.writeTextFile(template, content);
   }
 };

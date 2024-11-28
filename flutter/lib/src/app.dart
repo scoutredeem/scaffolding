@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:signals/signals_flutter.dart';
 
 import 'settings/settings_manager.dart';
 import 'shared/extensions.dart';
@@ -13,9 +14,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: get<SettingsManager>(),
-      builder: (BuildContext context, Widget? child) {
+    return Watch(
+      (_) {
+        final themeMode = get<SettingsManager>().themeMode;
+
         return MaterialApp.router(
           // enable restoring the navigation stack
           restorationScopeId: 'app',
@@ -31,7 +33,7 @@ class MyApp extends StatelessWidget {
           // app theme
           theme: styles.themeLight,
           darkTheme: styles.themeDark,
-          themeMode: get<SettingsManager>().themeMode,
+          themeMode: themeMode,
 
           // app routes
           routerDelegate: routes.routerDelegate,

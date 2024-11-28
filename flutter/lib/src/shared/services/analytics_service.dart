@@ -13,7 +13,7 @@ class AnalyticsService {
   Future<void> logSetting(String item, String value) async {
     await _analytics.logEvent(
       name: 'setting',
-      parameters: <String, dynamic>{
+      parameters: <String, Object>{
         'item': item,
         'value': value,
       },
