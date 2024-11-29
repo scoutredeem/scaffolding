@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:test_app/src/shared/services/store_service.dart';
 
 import 'doubles/store_double.dart';
 

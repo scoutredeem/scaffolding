@@ -25,6 +25,8 @@ linter:
     prefer_single_quotes: true
     curly_braces_in_flow_control_structures: false
     library_private_types_in_public_api: false
+    directives_ordering: true
+    prefer_relative_imports: true
 
 analyzer:
   errors:

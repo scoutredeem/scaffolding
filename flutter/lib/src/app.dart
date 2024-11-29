@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:signals/signals_flutter.dart';
 
 import 'settings/settings_manager.dart';
 import 'shared/extensions.dart';
@@ -13,34 +14,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: get<SettingsManager>(),
-      builder: (BuildContext context, Widget? child) {
-        return MaterialApp.router(
-          // enable restoring the navigation stack
-          restorationScopeId: 'app',
+    return MaterialApp.router(
+      // enable restoring the navigation stack
+      restorationScopeId: 'app',
 
-          // app localizations
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: const [
-            Locale('en'), // English, no country code
-          ],
+      // app localizations
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: const [
+        Locale('en'), // English, no country code
+      ],
 
-          onGenerateTitle: (context) => context.tr.appTitle,
+      onGenerateTitle: (context) => context.tr.appTitle,
 
-          // app theme
-          theme: styles.themeLight,
-          darkTheme: styles.themeDark,
-          themeMode: get<SettingsManager>().themeMode,
+      // app theme
+      theme: styles.themeLight,
+      darkTheme: styles.themeDark,
+      themeMode: get<SettingsManager>().themeModeSignal.watch(context),
 
-          // app routes
-          routerDelegate: routes.routerDelegate,
-          routeInformationParser: routes.routeInformationParser,
-          routeInformationProvider: routes.routeInformationProvider,
+      // app routes
+      routerDelegate: routes.routerDelegate,
+      routeInformationParser: routes.routeInformationParser,
+      routeInformationProvider: routes.routeInformationProvider,
 
-          debugShowCheckedModeBanner: false,
-        );
-      },
+      debugShowCheckedModeBanner: false,
     );
   }
 }

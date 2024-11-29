@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:test_app/src/shared/services/store_service.dart';
 
 class StoreDouble extends StoreService {
   StoreDouble(super.box) : super.init();
