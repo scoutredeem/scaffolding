@@ -14,35 +14,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Watch(
-      (_) {
-        final themeMode = get<SettingsManager>().themeMode;
+    return MaterialApp.router(
+      // enable restoring the navigation stack
+      restorationScopeId: 'app',
 
-        return MaterialApp.router(
-          // enable restoring the navigation stack
-          restorationScopeId: 'app',
+      // app localizations
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: const [
+        Locale('en'), // English, no country code
+      ],
 
-          // app localizations
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: const [
-            Locale('en'), // English, no country code
-          ],
+      onGenerateTitle: (context) => context.tr.appTitle,
 
-          onGenerateTitle: (context) => context.tr.appTitle,
+      // app theme
+      theme: styles.themeLight,
+      darkTheme: styles.themeDark,
+      themeMode: get<SettingsManager>().themeModeSignal.watch(context),
 
-          // app theme
-          theme: styles.themeLight,
-          darkTheme: styles.themeDark,
-          themeMode: themeMode,
+      // app routes
+      routerDelegate: routes.routerDelegate,
+      routeInformationParser: routes.routeInformationParser,
+      routeInformationProvider: routes.routeInformationProvider,
 
-          // app routes
-          routerDelegate: routes.routerDelegate,
-          routeInformationParser: routes.routeInformationParser,
-          routeInformationProvider: routes.routeInformationProvider,
-
-          debugShowCheckedModeBanner: false,
-        );
-      },
+      debugShowCheckedModeBanner: false,
     );
   }
 }

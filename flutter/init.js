@@ -99,7 +99,6 @@ const run = async () => {
 
   console.log(`Fetching templates ...`);
   await fetchTemplates();
-  // await copyTemplates();  // testing locally
 
   console.log(`Tweaking templates ...`);
   await tweakTemplates();
@@ -197,14 +196,6 @@ const fetchTemplates = async () => {
     }
 
     await Deno.writeTextFile(template, content);
-  }
-};
-
-const copyTemplates = async () => {
-  const devPath = '/Users/jannie/Code/scaffolding/flutter';
-  for (const template of templates) {
-    // console.log(`cp ${devPath}/${template} ./${template}`);
-    await $`cp ${devPath}/${template} ./${template}`;
   }
 };
 

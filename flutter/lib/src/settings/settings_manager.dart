@@ -14,20 +14,19 @@ class SettingsManager {
 
   final SettingsService _settingsService;
 
-  final _themeModeSignal = Signal<ThemeMode>(ThemeMode.system);
-  ThemeMode get themeMode => _themeModeSignal.value;
+  final themeModeSignal = Signal<ThemeMode>(ThemeMode.system);
 
   Future<void> updateThemeMode(ThemeMode? newThemeMode) async {
     if (newThemeMode == null) return;
-    if (newThemeMode == _themeModeSignal.value) return;
+    if (newThemeMode == themeModeSignal.value) return;
 
-    _themeModeSignal.value = newThemeMode;
+    themeModeSignal.value = newThemeMode;
 
     await _settingsService.updateThemeMode(newThemeMode);
     await get<AnalyticsService>().logSetting('themeMode', newThemeMode.name);
   }
 
   Future<void> loadSettings() async {
-    _themeModeSignal.value = await _settingsService.themeMode();
+    themeModeSignal.value = await _settingsService.themeMode();
   }
 }
