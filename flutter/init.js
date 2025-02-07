@@ -41,6 +41,7 @@ const templates = [
   'lib/src/shared/services/crashlytics_service.dart',
   'lib/src/shared/services/service_locator.dart',
   'lib/src/shared/services/store_service.dart',
+  '.cursorrules'
 ];
 
 const packages = [
