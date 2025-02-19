@@ -41,10 +41,10 @@ Changelog version configuration for a project:
  curl https://raw.githubusercontent.com/scoutredeem/scaffolding/main/.versionrc > .versionrc
 ```
 
-Grab the commit lint configuration for a project:
+Grab a PR linter for a project:
 
 ```
- curl https://raw.githubusercontent.com/scoutredeem/scaffolding/main/commitlint.config.js > commitlint.config.js
+ curl https://raw.githubusercontent.com/scoutredeem/scaffolding/main/flutter/.github/workflows/lint_pr.yml > .github/workflows/lint_pr.yml
 ```
 
 [1]: https://github.com/dsherret/dax
