@@ -28,29 +28,6 @@ To run all unit and widget tests:
 flutter test test/
 ```
 
-## Workflow and conventions
-
-- We follow a [classic git flow][1] for this project
-- Use [conventional commit v1.0.0][2] standard for commit messages
-- The app source code is in the lib folder and organised by feature. That means where
-  possible the root folders are feature folders that holds the models, managers and
-  widgets needed for that feature except for the `shared` folder.
-- Models, services, widgets and utilities that are used all across the app are located in
-  the `shared` folder.
-- The app is crafted along an MVVM architecture:
-- `M`: models and services do not depend on any other part of the app. A service can
-  reference models and other services, but not cyclical. Services are registered in the
-  central `service_locator.dart` and have a `_service` filename suffix.
-- `V`: page and component widgets are driven by view managers and can also depend directly
-  on models and services. Page widgets have a `_screen` filename suffix.
-- `VM`: view managers are the glue between the view and the base model/service layer. They
-  can depend on the `M` layer, but not the `V` layer. Managers are responsible for
-  updating the view and reacting to user input and other events. As a class they typically
-  extend a ChangeNotifier or have ValueNotifier properties. They are registered in the
-  service locator as a lazy loading singleton and have a `_manager` filename suffix.
-- To help avoid cyclical dependencies, a service dependency hierarchy is maintained in the
-  service locator where the registration order is determined.
-
 ## Release
 
 Update the release version number in pubspec.yaml, for example:
@@ -100,6 +77,4 @@ takes a parameter could be specified as follows:
 
 For more detail on formatting localized dates, numbers and plurals see [the docs][3]
 
-[1]: https://res.cloudinary.com/kiekies/image/upload/v1652880941/gugo2gvwuoumdxdbmino.png
-[2]: https://www.conventionalcommits.org/en/v1.0.0/
 [3]: https://ishort.ink/owwv
