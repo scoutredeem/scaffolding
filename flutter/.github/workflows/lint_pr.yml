@@ -3,7 +3,7 @@ name: 'Lint PR'
 on:
   pull_request:
     branches:
-      - develop
+      - main
 
 permissions:
   pull-requests: write
@@ -23,7 +23,7 @@ jobs:
             revert
             fix
             feat
-            incr
+            increment
             ops
             qa
             refactor
