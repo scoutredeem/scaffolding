@@ -23,7 +23,7 @@ jobs:
             revert
             fix
             feat
-            incr
+            increment
             ops
             qa
             refactor
