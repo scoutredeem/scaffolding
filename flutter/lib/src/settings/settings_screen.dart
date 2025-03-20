@@ -21,7 +21,7 @@ class SettingsView extends StatelessWidget {
         // Glue the SettingsManager to the theme selection DropdownButton.
         child: Watch(
           (_) {
-            final themeMode = get<SettingsManager>().themeMode;
+            final themeMode = get<SettingsManager>().themeModeSignal.value;
 
             return DropdownButton<ThemeMode>(
               // Read the selected themeMode from the manager

@@ -14,7 +14,7 @@ class SettingsManager {
 
   final SettingsService _settingsService;
 
-  final themeModeSignal = Signal<ThemeMode>(ThemeMode.system);
+  final themeModeSignal = signal<ThemeMode>(ThemeMode.system);
 
   Future<void> updateThemeMode(ThemeMode? newThemeMode) async {
     if (newThemeMode == null) return;
