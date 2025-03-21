@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:signals/signals_flutter.dart';
 
+import 'localization/app_localizations.dart';
 import 'settings/settings_manager.dart';
 import 'shared/extensions.dart';
 import 'shared/routes.dart';
@@ -14,29 +14,33 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      // enable restoring the navigation stack
-      restorationScopeId: 'app',
+    return Watch((_) {
+      final themeMode = get<SettingsManager>().themeMode;
 
-      // app localizations
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: const [
-        Locale('en'), // English, no country code
-      ],
+      return MaterialApp.router(
+        // enable restoring the navigation stack
+        restorationScopeId: 'app',
 
-      onGenerateTitle: (context) => context.tr.appTitle,
+        // app localizations
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: const [
+          Locale('en'), // English, no country code
+        ],
 
-      // app theme
-      theme: styles.themeLight,
-      darkTheme: styles.themeDark,
-      themeMode: get<SettingsManager>().themeModeSignal.watch(context),
+        onGenerateTitle: (context) => context.tr.appTitle,
 
-      // app routes
-      routerDelegate: routes.routerDelegate,
-      routeInformationParser: routes.routeInformationParser,
-      routeInformationProvider: routes.routeInformationProvider,
+        // app theme
+        theme: styles.themeLight,
+        darkTheme: styles.themeDark,
+        themeMode: themeMode,
 
-      debugShowCheckedModeBanner: false,
-    );
+        // app routes
+        routerDelegate: routes.routerDelegate,
+        routeInformationParser: routes.routeInformationParser,
+        routeInformationProvider: routes.routeInformationProvider,
+
+        debugShowCheckedModeBanner: false,
+      );
+    });
   }
 }
