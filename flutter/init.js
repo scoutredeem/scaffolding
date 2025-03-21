@@ -30,6 +30,7 @@ const templates = [
   'lib/main.dart',
   'lib/src/app.dart',
   'lib/src/localization/app_en.arb',
+  'lib/src/localization/.gitignore',
   'lib/src/navigation/root_screen.dart',
   'lib/src/settings/settings_manager.dart',
   'lib/src/settings/settings_screen.dart',
