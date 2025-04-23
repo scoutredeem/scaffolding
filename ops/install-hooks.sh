@@ -49,6 +49,7 @@ read local_ref local_sha remote_ref remote_sha
 if [[ "$remote_ref" == *"/main" ]]; then
   echo "Error: Direct push to main branch is not allowed."
   echo "Please create a pull request instead."
+  echo "If you want to force push the commit use --no-verify flag"
   exit 1
 fi
 
