@@ -18,6 +18,7 @@ const rootFolders = [
 
 const templates = [
   'README.md',
+  'Makefile',
   'analysis_options.yaml',
   '.versionrc',
   'flutter_launcher_icons.yaml',
