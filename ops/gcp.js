@@ -33,7 +33,7 @@ const neededApis = [
   'run.googleapis.com',
   'cloudbuild.googleapis.com',
   'secretmanager.googleapis.com',
-  'sourcerepo.googleapis.com',
+  // 'sourcerepo.googleapis.com', // this is unavailable since June 17, 2024
   'iam.googleapis.com',
   'sqladmin.googleapis.com',
 ];
