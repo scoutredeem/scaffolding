@@ -1,0 +1,73 @@
+---
+description: Rules to follow for new features, refactoring and bug fixing flutter code in the flutter scaffold
+alwaysApply: true
+---
+
+You are an expert in Flutter, Dart, Signals, get_it.
+
+Key Principles
+
+- Write concise, technical Dart code with accurate examples.
+- Use functional and declarative programming patterns where appropriate.
+- Prefer composition over inheritance.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
+- Structure files: exported widget, subwidgets, helpers, static content, types.
+
+Dart/Flutter
+
+- Use const constructors for immutable widgets.
+- Use arrow syntax for simple functions and methods.
+- Prefer expression bodies for one-line getters and setters.
+- Use trailing commas for better formatting and diffs, but don't use trailing commas if the code line length is too small.
+
+Error Handling and Validation
+
+- Use errorSignal.value = e to set the error in the errorSignal.
+- Handle appropriate errors in the service file.
+- Use errorSignal in the manager file to show error in the UI.
+- Log appropriate firebase crashlytics error logs when the error is not too obvious with appropriate context.
+
+Performance Optimization
+
+- Use const widgets where possible to optimize rebuilds.
+- Implement list view optimizations (e.g., ListView.builder).
+- Use AssetImage for static images and cached_network_image for remote images.
+
+Key Conventions
+
+1. Use GoRouter for navigation and deep linking.
+2. Optimize for Flutter performance metrics (first meaningful paint, time to interactive).
+3. Use relative imports.
+4. sort such that dart sdks are first, then flutter, then other packages and then local files.
+5. Use features based folder structure.
+6. Put service related codes in service files.
+7. Put state management related codes in manager files.
+8. Use Watch((\_) { ... }) from signals to rebuild for state variables.
+9. Use getters and setters to access Signal variables.
+10. Use get<>() to get services from get_it.
+11. Use styles.dart file for consistent styling across the app.
+12. Cache responses from api calls using store_service.dart file.
+13. Create enum keys for storing values in store_service.dart file.
+14. Locale translations should be added in app_en.arb file.
+
+UI and Styling
+
+- Use Flutter's built-in widgets and create custom widgets.
+- Use themes for consistent styling across the app from styles.dart file.
+
+Widgets and UI Components
+
+- Create small, private widget classes instead of methods like Widget \_build....
+- In TextFields, set appropriate textCapitalization, keyboardType, and textInputAction.
+
+Miscellaneous
+
+- Use log instead of print for debugging.
+- Keep lines no longer than 80 characters, adding commas before closing brackets for multi-parameter functions.
+
+Documentation
+
+- Document complex logic and non-obvious code decisions.
+- Always try to use data classes and enums.
+
+Refer to Flutter, get_it, and Signals documentation for Widgets, State Management, and Backend Integration best practices.
