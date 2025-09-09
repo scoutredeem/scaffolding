@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+
+import '../localization/app_localizations.dart';
 
 const designHeight = 812;
 
 extension ExtendBuildContext on BuildContext {
-    AppLocalizations get tr => AppLocalizations.of(this)!;
+  AppLocalizations get tr => AppLocalizations.of(this)!;
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
   double get displayScale => MediaQuery.of(this).devicePixelRatio;
   bool get isLTR => Directionality.of(this) == TextDirection.ltr;
@@ -33,9 +34,10 @@ extension ExtendBuildContext on BuildContext {
     final router = GoRouter.of(this);
     final RouteMatch lastMatch =
         router.routerDelegate.currentConfiguration.last;
-    final RouteMatchList matchList = lastMatch is ImperativeRouteMatch
-        ? lastMatch.matches
-        : router.routerDelegate.currentConfiguration;
+    final RouteMatchList matchList =
+        lastMatch is ImperativeRouteMatch
+            ? lastMatch.matches
+            : router.routerDelegate.currentConfiguration;
     return matchList.uri.toString();
   }
 }
@@ -60,10 +62,7 @@ extension WidgetX on Widget {
     if (kDebugMode) {
       return Container(
         decoration: BoxDecoration(
-          border: Border.all(
-            width: 0.5,
-            color: Colors.red,
-          ),
+          border: Border.all(width: 0.5, color: Colors.red),
         ),
         child: Stack(
           children: [
@@ -85,9 +84,7 @@ extension WidgetX on Widget {
                         },
                       );
                     },
-                    child: Container(
-                      color: Colors.red.withOpacity(0.3),
-                    ),
+                    child: Container(color: Colors.red.withOpacity(0.3)),
                   );
                 },
               ),
@@ -125,7 +122,6 @@ extension WidgetX on Widget {
 extension ColorX on Color {
   ColorFilter get colorFilter => ColorFilter.mode(this, BlendMode.srcIn);
 }
-
 
 // Adds a method to the Iterable class that allows you to intersperse a separator between each element of the iterable.
 // Example:

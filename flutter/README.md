@@ -5,6 +5,12 @@
 For setting up the Dart SDK and Flutter, see the
 [official documentation](https://flutter.io/)
 
+Setup git hooks for commit message linting:
+
+```
+make setup-hooks
+```
+
 To set up Firebase, run the following using your specific bundle id:
 
 ```

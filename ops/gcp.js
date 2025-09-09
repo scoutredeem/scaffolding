@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run
 
-import $ from "jsr:@david/dax@0.40.0";
+import $ from 'jsr:@david/dax@0.40.0';
 
 const options = {
   region: 'europe-west2', // London
@@ -10,7 +10,7 @@ const options = {
   dbEngine: 'POSTGRES_17', // bumps every year
   dbCpu: 1,
   dbMemory: '4GiB',
-}
+};
 
 const prodEnvironment = [
   'PORT',
@@ -31,11 +31,11 @@ const prodEnvironment = [
   'DATABASE_SSL=true',
 ];
 
+// 'sourcerepo.googleapis.com', // this is unavailable since June 17, 2024
 const neededApis = [
   'run.googleapis.com',
   'cloudbuild.googleapis.com',
   'secretmanager.googleapis.com',
-  'sourcerepo.googleapis.com',
   'iam.googleapis.com',
   'sqladmin.googleapis.com',
 ];
@@ -54,7 +54,7 @@ const database = {
   address: '',
   user: 'postgres',
   password: '',
-}
+};
 
 const envVars = [];
 const secrets = [];
@@ -73,7 +73,12 @@ const run = async () => {
 
     const action = await $.select({
       message: `With project ${project.id}, what do you want to do?`,
-      options: ['Create a cloud run service', 'Create a build trigger', 'Create a secret',],
+      options: [
+        'Create a cloud run service',
+        'Create a build trigger',
+        'Create a secret',
+        'Create a load balancer',
+      ],
     });
 
     switch (action) {
@@ -105,11 +110,13 @@ const run = async () => {
         await createNewSecret();
         break;
 
+      case 3:
+        await createLoadBalancer();
+        break;
+
       default:
         break;
     }
-
-
   } catch (error) {
     $.logError(error.message);
     return;
@@ -123,7 +130,7 @@ const printHelp = () => {
   $.log('Options can be:');
   $.log('--help     : print this help message');
   $.log('--skip-auth: the cli is already authenticated, use the active config');
-}
+};
 
 const preflight = async () => {
   try {
@@ -132,7 +139,6 @@ const preflight = async () => {
     throw new Error('gcloud is not installed.');
   }
 };
-
 
 const setProject = async () => {
   if (Deno.args.includes('--skip-auth')) {
@@ -156,7 +162,6 @@ const setProject = async () => {
     return;
   }
 
-
   const config = await selectConfig();
   if (!config) {
     await createConfig();
@@ -169,7 +174,7 @@ const setProject = async () => {
   }
   await populateConfig();
   await enableAPIs();
-}
+};
 
 const preflightCloudRun = async () => {
   let lines = [];
@@ -237,7 +242,6 @@ const authenticate = async () => {
     throw new Error('Failed to authenticate with gcloud.');
   }
 };
-
 
 const setAccount = async () => {
   $.log('Checking the account and billing');
@@ -342,6 +346,7 @@ const enableAPIs = async () => {
   $.logGroup();
 
   for (const api of neededApis) {
+    $.log(`attempting to enable ${api} ...`);
     if (enabledApis.includes(api)) {
       $.logLight(`✓ ${api} is enabled`);
     } else {
@@ -369,7 +374,7 @@ const selectSqlInstance = async () => {
   database.connection = selectedInstance.connectionName;
   database.address = selectedInstance.ipAddresses[0].ipAddress;
   return selectedInstance;
-}
+};
 
 const createSqlInstance = async () => {
   // https://cloud.google.com/sdk/gcloud/reference/sql/instances/create
@@ -388,7 +393,7 @@ const createSqlInstance = async () => {
     noClear: true,
   });
 
-  $.log("Creating a Cloud SQL instance");
+  $.log('Creating a Cloud SQL instance');
   $.logGroup();
 
   const sqlApis = ['sql-component.googleapis.com', 'sqladmin.googleapis.com'];
@@ -402,16 +407,17 @@ const createSqlInstance = async () => {
   }
 
   $.logLight(`Creating the instance. This takes a few minutes.`);
-  const instance = await $`gcloud sql instances create ${database.instance} --database-version=${options.dbEngine} --cpu=${options.dbCpu} --memory=${options.dbMemory} --zone=${options.zone} --root-password=${rootPassword} --format=json`.json();
+  const instance =
+    await $`gcloud sql instances create ${database.instance} --database-version=${options.dbEngine} --cpu=${options.dbCpu} --memory=${options.dbMemory} --zone=${options.zone} --root-password=${rootPassword} --format=json`.json();
   database.connection = instance.connectionName;
   database.address = instance.ipAddresses[0].ipAddress;
   $.logLight(`✓ instance created and running at ${database.address}`);
   $.logGroupEnd();
 };
 
-
 const selectDabase = async () => {
-  const databases = await $`gcloud sql databases list --instance=${database.instance} --format=json`.json();
+  const databases =
+    await $`gcloud sql databases list --instance=${database.instance} --format=json`.json();
   if (databases.length === 0) return null;
 
   const newDatabase = 'Create a new database';
@@ -425,7 +431,7 @@ const selectDabase = async () => {
   const selectedDatabase = databases[option];
   database.name = selectedDatabase.name;
   return selectedDatabase;
-}
+};
 
 const createDatabase = async () => {
   database.name = await $.prompt({
@@ -480,8 +486,11 @@ const getEnvironment = async () => {
       message: key,
       default: getDefault(key, start, prodDefaults),
       noClear: true,
-    })
-    const isSecret = await $.confirm({ message: 'Is this a secret?', default: looksSecretive(key) });
+    });
+    const isSecret = await $.confirm({
+      message: 'Is this a secret?',
+      default: looksSecretive(key),
+    });
     if (isSecret) {
       secrets.push({ key, value });
     } else {
@@ -491,9 +500,23 @@ const getEnvironment = async () => {
 };
 
 const looksSecretive = (key) => {
-  const secretive = ['PASSWORD', 'SECRET', 'KEY', 'TOKEN', 'SALT', 'HASH', 'PRIVATE', 'CERT', 'PEM', 'AUTH', 'PASS', 'PIN', 'CODE',];
+  const secretive = [
+    'PASSWORD',
+    'SECRET',
+    'KEY',
+    'TOKEN',
+    'SALT',
+    'HASH',
+    'PRIVATE',
+    'CERT',
+    'PEM',
+    'AUTH',
+    'PASS',
+    'PIN',
+    'CODE',
+  ];
   return secretive.some((item) => key.toUpperCase().includes(item));
-}
+};
 
 const getDefault = (key, start, prodDefaults) => {
   const spec = prodDefaults.find((item) => item.key === key);
@@ -523,7 +546,7 @@ const getDefault = (key, start, prodDefaults) => {
   }
 
   return start;
-}
+};
 
 const createSecrets = async () => {
   $.log('Creating secrets');
@@ -533,7 +556,9 @@ const createSecrets = async () => {
   const all = await $`gcloud secrets list --format=json`.json();
 
   for (const secret of secrets) {
-    if (all.find((item) => item.name === `projects/${project.number}/secrets/${secret.key}`)) {
+    if (
+      all.find((item) => item.name === `projects/${project.number}/secrets/${secret.key}`)
+    ) {
       $.logLight(`✓ ${secret.key} already exists`);
       continue;
     }
@@ -579,7 +604,6 @@ const createNewSecret = async () => {
     await $`echo ${value} | gcloud secrets create ${key} --data-file=-`;
     $.logStep(`✓ ${key} created\n`);
   } while (true);
-
 };
 
 const setCloudRun = async () => {
@@ -606,7 +630,7 @@ const setCloudRun = async () => {
     ...sec,
   ];
 
-  // the command is to long to run from the script 
+  // the command is to long to run from the script
   // so we dump it in the report for the user to run it manually
   cloudRun = lines.join('\n');
 };
@@ -650,13 +674,13 @@ const report = () => {
   //   }
   //   $.logGroupEnd();
   // }
-}
+};
 
 class Build {
   static buildConnection = {
     name: 'github',
     platform: 'github',
-  }
+  };
 
   constructor(project) {
     this.project = project;
@@ -666,7 +690,8 @@ class Build {
 
   async setConnection() {
     // assuming one connection per project
-    const connections = await $`gcloud builds connections list --region=${options.region} --format=json`.json();
+    const connections =
+      await $`gcloud builds connections list --region=${options.region} --format=json`.json();
     if (connections.length > 0) {
       this.connection = connections[0];
       return;
@@ -688,11 +713,13 @@ class Build {
     await $`gcloud projects add-iam-policy-binding ${this.project.id} --member serviceAccount:${this.project.number}@cloudbuild.gserviceaccount.com --role=roles/cloudsql.client --role=roles/secretmanager.secretAccessor`;
     $.logLight(`✓ access granted to read secrets and migrate the database`);
     $.logGroupEnd();
-    this.connection = await $`gcloud builds connections create ${Build.buildConnection.platform} ${Build.buildConnection.name} --project=${this.project.id} --region=${options.region}`;
+    this.connection =
+      await $`gcloud builds connections create ${Build.buildConnection.platform} ${Build.buildConnection.name} --project=${this.project.id} --region=${options.region}`;
   }
 
   async setRepo() {
-    const repos = await $`gcloud builds repositories list --connection=${this.connection.name} --format=json`.json();
+    const repos =
+      await $`gcloud builds repositories list --connection=${this.connection.name} --format=json`.json();
     if (repos.length === 0) {
       await this.createRepo();
       return;
@@ -726,19 +753,21 @@ class Build {
     $.log('\nCreating a repository');
     $.logGroup();
     $.logLight(`using the connection to create a repository`);
-    this.repository = await $`gcloud builds repositories create ${name} --remote-uri=${url} --connection=${this.connection.name} --region=${options.region} --format=json`.json();
+    this.repository =
+      await $`gcloud builds repositories create ${name} --remote-uri=${url} --connection=${this.connection.name} --region=${options.region} --format=json`.json();
     console.log(this.repository);
     $.logLight(`✓ repository created`);
     $.logGroupEnd();
   }
 
   async pickService() {
-    const services = await $`gcloud run services list --platform=managed --format=json`.json();
+    const services =
+      await $`gcloud run services list --platform=managed --format=json`.json();
 
     const name = await $.select({
       message: 'What service should be deployed?',
       options: services.map((service) => service.metadata.name),
-    })
+    });
 
     return name;
   }
@@ -757,16 +786,13 @@ class Build {
 
     this.triggerType = await $.select({
       message: `What type of build trigger is needed?`,
-      options: [
-        'CD - deploy to Cloud Run',
-        'CI - run tests on new pull requests',
-      ],
+      options: ['CD - deploy to Cloud Run', 'CI - run tests on new pull requests'],
     });
 
     const defaults = {
       name: '',
       description: '',
-      branch: ''
+      branch: '',
     };
 
     switch (this.triggerType) {
@@ -807,7 +833,134 @@ class Build {
     $.logLight(`using the connection to create a trigger`);
     $.logGroupEnd();
   }
-
 }
 
 await run();
+
+/* Rest requests generated by gcp for the load balancer.
+
+POST https://compute.googleapis.com/compute/v1/projects/ntj-journey/global/securityPolicies
+{
+  "description": "Default security policy for: startjourneys-io-backend",
+  "name": "security-policy-backend-service-startjourneys-io-backend",
+  "rules": [
+    {
+      "action": "allow",
+      "match": {
+        "config": {
+          "srcIpRanges": [
+            "*"
+          ]
+        },
+        "versionedExpr": "SRC_IPS_V1"
+      },
+      "priority": 2147483647
+    },
+    {
+      "action": "throttle",
+      "description": "Default rate limiting rule",
+      "match": {
+        "config": {
+          "srcIpRanges": [
+            "*"
+          ]
+        },
+        "versionedExpr": "SRC_IPS_V1"
+      },
+      "priority": 2147483646,
+      "rateLimitOptions": {
+        "conformAction": "allow",
+        "enforceOnKey": "IP",
+        "exceedAction": "deny(403)",
+        "rateLimitThreshold": {
+          "count": 500,
+          "intervalSec": 60
+        }
+      }
+    }
+  ]
+}
+
+POST https://compute.googleapis.com/compute/beta/projects/ntj-journey/regions/europe-west2/networkEndpointGroups
+{
+  "cloudRun": {
+    "service": "production"
+  },
+  "name": "startjourneys-io-endpointgroup",
+  "networkEndpointType": "SERVERLESS",
+  "region": "projects/ntj-journey/regions/europe-west2"
+}
+
+POST https://compute.googleapis.com/compute/beta/projects/ntj-journey/global/backendServices
+{
+  "backends": [
+    {
+      "balancingMode": "UTILIZATION",
+      "group": "projects/ntj-journey/regions/europe-west2/networkEndpointGroups/startjourneys-io-endpointgroup"
+    }
+  ],
+  "cdnPolicy": {
+    "cacheKeyPolicy": {
+      "includeHost": true,
+      "includeProtocol": true,
+      "includeQueryString": true
+    },
+    "cacheMode": "CACHE_ALL_STATIC",
+    "clientTtl": 3600,
+    "defaultTtl": 3600,
+    "maxTtl": 86400,
+    "negativeCaching": false,
+    "serveWhileStale": 0
+  },
+  "compressionMode": "DISABLED",
+  "connectionDraining": {
+    "drainingTimeoutSec": 0
+  },
+  "description": "backend service for startjourneys-io custom domain",
+  "enableCDN": true,
+  "loadBalancingScheme": "EXTERNAL_MANAGED",
+  "localityLbPolicy": "ROUND_ROBIN",
+  "logConfig": {
+    "enable": false
+  },
+  "name": "startjourneys-io-backend",
+  "protocol": "HTTPS",
+  "securityPolicy": "projects/ntj-journey/global/securityPolicies/security-policy-backend-service-startjourneys-io-backend",
+  "sessionAffinity": "NONE",
+  "timeoutSec": 30
+}
+
+POST https://compute.googleapis.com/compute/v1/projects/ntj-journey/global/backendServices/startjourneys-io-backend/setSecurityPolicy
+{
+  "securityPolicy": "projects/ntj-journey/global/securityPolicies/security-policy-backend-service-startjourneys-io-backend"
+}
+
+POST https://compute.googleapis.com/compute/v1/projects/ntj-journey/global/urlMaps
+{
+  "defaultService": "projects/ntj-journey/global/backendServices/startjourneys-io-backend",
+  "name": "serverless-lb"
+}
+
+POST https://compute.googleapis.com/compute/v1/projects/ntj-journey/global/targetHttpsProxies
+{
+  "name": "serverless-lb-target-proxy",
+  "quicOverride": "NONE",
+  "sslCertificates": [
+    "projects/ntj-journey/global/sslCertificates/startjourneys-io"
+  ],
+  "tlsEarlyData": "DISABLED",
+  "urlMap": "projects/ntj-journey/global/urlMaps/serverless-lb"
+}
+
+POST https://compute.googleapis.com/compute/beta/projects/ntj-journey/global/forwardingRules
+{
+  "IPAddress": "projects/ntj-journey/global/addresses/startjourneys-io",
+  "IPProtocol": "TCP",
+  "description": "loadbalancer for startjourneys-io custom domain",
+  "loadBalancingScheme": "EXTERNAL_MANAGED",
+  "name": "startjourneys-io",
+  "networkTier": "PREMIUM",
+  "portRange": "443",
+  "target": "projects/ntj-journey/global/targetHttpsProxies/serverless-lb-target-proxy"
+}
+*/
