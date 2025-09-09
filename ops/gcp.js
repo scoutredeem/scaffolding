@@ -3,9 +3,11 @@
 import $ from "jsr:@david/dax@0.40.0";
 
 const options = {
-  region: 'europe-west1',
-  zone: 'europe-west1-d',
-  dbEngine: 'POSTGRES_15',
+  region: 'europe-west2', // London
+  // region: 'europe-west1', // Belgium
+  // gcloud compute zones list --filter="region:europe-west2"
+  zone: 'europe-west2-c',
+  dbEngine: 'POSTGRES_17', // bumps every year
   dbCpu: 1,
   dbMemory: '4GiB',
 }
@@ -66,7 +68,6 @@ const run = async () => {
       printHelp();
       return;
     }
-
     await preflight();
     await setProject();
 
@@ -77,17 +78,17 @@ const run = async () => {
 
     switch (action) {
       case 0:
-        await selectSqlInstance();
-        if (!database.instance) {
-          await createSqlInstance();
-        }
+        // await selectSqlInstance();
+        // if (!database.instance) {
+        //   await createSqlInstance();
+        // }
 
-        if (database.instance) {
-          await selectDabase();
-          if (!database.name) {
-            await createDatabase();
-          }
-        }
+        // if (database.instance) {
+        //   await selectDabase();
+        //   if (!database.name) {
+        //     await createDatabase();
+        //   }
+        // }
 
         await getEnvironment();
         await createSecrets();
@@ -195,7 +196,7 @@ const selectConfig = async () => {
 
   const newProject = 'Create a new configuration';
   const option = await $.select({
-    message: 'Select an existing project or create a new one',
+    message: 'Select an existing cli configuration or create a new one',
     options: [...configs.map((project) => project.name), newProject],
   });
 
@@ -250,6 +251,7 @@ const setAccount = async () => {
 
   project.account = active.account;
 
+  // TODO: for one project this reported billing is set when it wasn't
   const billing = await $`gcloud billing accounts list --format=json`.json();
   if (billing.length === 0) {
     throw new Error('No billing account found. Please set up billing for your account.');
@@ -312,6 +314,8 @@ const populateConfig = async () => {
   const enabled = await $`gcloud services list --enabled --format=json`.json();
   enabledApis = enabled.map((service) => service.config.name);
 
+  // Not sure why we need to enable this here
+  // This crashed the app
   if (!enabledApis.includes('compute.googleapis.com')) {
     $.logLight(`enabling compute API ...`);
     await $`gcloud services enable compute.googleapis.com`.quiet();
