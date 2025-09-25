@@ -5,6 +5,7 @@ import chalk from 'https://deno.land/x/chalk_deno@v4.1.1-deno/source/index.js';
 
 const rootFolders = [
   '_meta',
+  '.cursor/rules',
   'assets/fonts',
   'assets/images',
   'assets/icons',
@@ -25,6 +26,8 @@ const templates = [
   'l10n.yaml',
   '.github/workflows/test.yml',
   '_meta/.gitignore',
+  '.cursor/rules/basic-architecture.mdc',
+  '.cursor/rules/code-conventions.mdc',
   'test/store_test.dart',
   'test/doubles/store_double.dart',
   'test/widget_test.dart',
@@ -42,8 +45,7 @@ const templates = [
   'lib/src/shared/services/analytics_service.dart',
   'lib/src/shared/services/crashlytics_service.dart',
   'lib/src/shared/services/service_locator.dart',
-  'lib/src/shared/services/store_service.dart',
-  '.cursorrules'
+  'lib/src/shared/services/store_service.dart'
 ];
 
 const packages = [

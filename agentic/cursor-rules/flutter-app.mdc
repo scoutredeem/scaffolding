@@ -63,7 +63,7 @@ Widgets and UI Components
 Miscellaneous
 
 - Use log instead of print for debugging.
-- Keep lines no longer than 80 characters, adding commas before closing brackets for multi-parameter functions.
+- Keep lines no longer than 100 characters, adding commas before closing brackets for multi-parameter functions.
 
 Documentation
 

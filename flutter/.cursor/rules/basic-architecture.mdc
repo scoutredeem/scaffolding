@@ -1,0 +1,78 @@
+---
+description: Basic Architecture
+alwaysApply: false
+---
+
+## Folder organisation
+
+The app source code is in the lib folder and organised by feature. That means where possible the root folders are feature folders that holds the models, managers and widgets needed for that feature except for the `shared` folder.
+
+Models, services, widgets and utilities that are used all across the app are located in the `shared` folder.
+
+## Code organisation
+
+The app is crafted along a layered MVVM architecture:
+
+- `M`: models and services do not depend on any other part of the app. A service can
+  reference models and other services, but not cyclical. Services are registered in the
+  central `service_locator.dart` and have a `_service` filename suffix.
+- `V`: page and component widgets are driven by view managers and can also depend directly
+  on models and services. Page widgets have a `_screen` filename suffix.
+- `VM`: view managers are the glue between the view and the base model/service layer. They
+  can depend on the `M` layer, but not the `V` layer. Managers are responsible for
+  updating the view and reacting to user input and other events via reactive Signal
+  properties. They are registered in the service locator as a lazy loading singleton and
+  have a `_manager` filename suffix.
+
+  Example feature folder:
+
+  ```
+  lib/src/maintain/
+  ├── entry_screen.dart       # Main entry detail/edit screen
+  ├── entry_manager.dart      # View manager for the entry screen
+  ├── index_screen.dart       # Main index/list screen
+  ├── index_manager.dart      # View manager for index screen
+  └── widgets/                # UI components for this feature
+      ├── filter_bar.dart
+      ├── flag_button.dart
+      ├── index_card.dart
+      ├── index_grid.dart
+      ├── loading_card.dart
+      └── new_card.dart
+  ```
+
+  This structure follows the MVVM pattern:
+
+  - **Screens** (`*_screen.dart`): Main page widgets that users navigate to
+  - **Managers** (`*_manager.dart`): State management and business logic for screens/features
+  - **Widgets folder**: Contains all reusable UI components specific to this feature
+
+## State management
+
+- a screen's state and business logic is kept in it's manager file
+- use getters and setters to access Signal values
+
+example manager state:
+
+```
+final _filter = signal<IndexFilter>(IndexFilter.latest);
+IndexFilter get filter => _filter.value;
+set filter(IndexFilter value) {
+    _filter.value = value;
+    // ... other actions
+}
+```
+
+In the manager's screen:
+
+- use get<IndexManager>() to resolve managers and services from the get_it service locator
+- the build tree use Watch((\_) { ... }) from signals to trigger rebuilds
+
+## Error handling
+
+- in lower layers like services, assume the happy path and let exceptions bubble up to the manager where it is catched
+- catch and rethrow a custom exception at the lower levels if the user feedback requires this detail
+- in the catch blocks set the \_errorSignal.value
+- in the widgets watch the error signal and give feedback to the user as appropriate
+- Use functional and declarative programming patterns where appropriate.
+- Prefer composition over inheritance.
