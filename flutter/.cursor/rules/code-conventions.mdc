@@ -1,0 +1,33 @@
+---
+description: Flutter and Dart Code Conventions
+globs: *.dart
+alwaysApply: true
+---
+
+You are an expert in Flutter, Dart, Signals, get_it.
+
+## Imports
+
+- use relative imports
+- sort imports such that dart sdks are first, then flutter, then other packages and then local files
+
+## Widgets
+
+- prefer composition via small stateless widgets where possible
+- put the `build` method first, followed by private methods and getters, followed by widget lifecycle methods like `initState` and `dispose`
+- break down long, complicated build trees into separate composed widgets or `_buildColorList` methods
+
+## Conventions
+
+- use descriptive variable names with auxiliary verbs like `isLoading` and `hasError`
+- use verbs for method names like `fetchIndex()` and `storeColor()`
+- use features based folder structure
+- put service related code in service files
+- use GoRouter for navigation and deep linking
+- create enum keys for storing values in store_service.dart file
+- cache responses from api calls in the local store
+- string literals should be added in app_en.arb file and read from the context via the extension method helperlike this `Text(context.tr.errorAddingEntry)`
+- in TextFields, set appropriate textCapitalization, keyboardType, and textInputAction
+- use log instead of print for debugging
+- keep lines shorter than 100 characters by adding commas before closing brackets for multi-parameter functions
+- document complex logic and non-obvious code decisions

@@ -5,11 +5,11 @@
 ## Commit Message Guidelines
 
 We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) to
-standardize commit messages. Coomit types can be one of the following:
+standardize commit messages. Commit types can be one of the following:
 
 - `feat`: A new feature
 - `fix`: A bug fix
-- `incr`: A functional improvement that is not a feat or a fix
+- `increment`: A functional improvement that is not a feat or a fix
 - `ops`: Non-functional code changes needed to build or deploy the app (chore, ci, build)
 - `qa`: Non-functional changes to improve understanding and assurance (tests, docs)
 - `refactor`: Non-functional changes that improve maintainability and efficiency
