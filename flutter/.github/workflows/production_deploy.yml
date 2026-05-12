@@ -1,0 +1,98 @@
+name: Production Deploy
+
+on:
+  # Trigger the workflow only when a tag matching v*.*.*+* format is pushed
+  # Example: v21.0.0+1256
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: contains(github.ref_name, '+')
+    permissions:
+      contents: read
+      deployments: write
+    name: Publish to Cloudflare Pages
+    steps:
+      # Setup Java environment in order to build the Android app.
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+
+      # Setup the flutter environment.
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Setup firebase_options.dart file
+        run: echo "$FIREBASE_OPTIONS_DART"  | base64 --decode > lib/firebase_options.dart
+        shell: bash
+        env:
+          FIREBASE_OPTIONS_DART: ${{secrets.FIREBASE_OPTIONS_DART}}
+
+      - name: Setup .env file
+        run: echo "$DOT_ENV"  | base64 --decode > .env
+        shell: bash
+        env:
+          DOT_ENV: ${{secrets.DOT_ENV}}
+
+      # Get flutter dependencies.
+      - run: flutter pub get
+
+      - run: dart run build_runner build --delete-conflicting-outputs
+
+      - run: flutter build web
+
+      # Run a build step here if your project requires
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: << cloudflare account id >>
+          projectName: << cloudflare project name >>
+          directory: build/web
+          branch: main
+          # Optional: Enable this if you want to have GitHub Deployments triggered
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
+          wranglerVersion: '3'
+        id: deploy
+
+      - name: Notify Slack on Success
+        if: success()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "text": "✅ << project name >> Production Deployment Successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*✅ << project name >> Production Deployment Successful*\n\n*Project:* << cloudflare project name >>\n*Tag:* ${{ github.ref_name }}\n*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Author:* ${{ github.actor }}\n*Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
+                  }
+                }
+              ]
+            }' \
+            ${{ secrets.SLACK_REDEEM_BOT_URL }}
+
+      - name: Notify Slack on Failure
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "text": "❌ << project name >> Production Deployment Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ << project name >> Production Deployment Failed*\n\n*Project:* << cloudflare project name >>\n*Tag:* ${{ github.ref_name }}\n*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Author:* ${{ github.actor }}\n*Workflow:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
+                  }
+                }
+              ]
+            }' \
+            ${{ secrets.SLACK_REDEEM_BOT_URL }}

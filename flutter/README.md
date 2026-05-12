@@ -51,6 +51,14 @@ npx standard-version -- --release-as 8.4.5
 The version should be tagged and shared as soon as a build is submitted for public
 release.
 
+## Deployment (Flutter web via GitHub Actions + Cloudflare Pages)
+
+- PR previews: `.github/workflows/pr_deploy.yml` runs on every pull request. It builds the web app and deploys a Cloudflare Pages preview using the PR branch name as the preview branch/subdomain.
+- Staging: `.github/workflows/staging_deploy.yml` runs on pushes to `main`. It builds the web app and deploys to the Pages `staging` branch. Slack is notified on success/failure.
+- Production: `.github/workflows/production_deploy.yml` runs on tag pushes matching `v*.*.*` and only proceeds when the tag contains a `+` (e.g. `v1.2.3+45`). It builds and deploys using the `main` branch content. Slack is notified on success/failure.
+- Required GitHub Action secrets: `CLOUDFLARE_API_TOKEN`, `FIREBASE_OPTIONS_DART` (base64 of `lib/firebase_options.dart`), `DOT_ENV` (base64 of `.env`), `SLACK_REDEEM_BOT_URL` (incoming webhook), and the repo-provided `GITHUB_TOKEN`.
+- Release deploy example: `git tag v1.2.3+45 && git push origin v1.2.3+45` to trigger production deployment.
+
 ### App localisation
 
 To add a new language, say Spanish:
