@@ -13,6 +13,7 @@ standardize commit messages. Commit types can be one of the following:
 - `ops`: Non-functional code changes needed to build or deploy the app (chore, ci, build)
 - `qa`: Non-functional changes to improve understanding and assurance (tests, docs)
 - `refactor`: Non-functional changes that improve maintainability and efficiency
+- `steer`: Changes related to context engineering and steering agents
 
 ## Architecture
 
