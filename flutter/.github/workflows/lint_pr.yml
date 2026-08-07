@@ -27,6 +27,7 @@ jobs:
             ops
             qa
             refactor
+            steer
           ignoreLabels: |
             bot
             ignore-semantic-pull-request

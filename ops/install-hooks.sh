@@ -19,7 +19,7 @@ if [ "$COMMIT_SOURCE" = "merge" ] || [ "$COMMIT_SOURCE" = "squash" ]; then
 fi
 
 # Define valid types
-VALID_TYPES="revert|fix|feat|increment|ops|qa|refactor"
+VALID_TYPES="revert|fix|feat|increment|ops|qa|refactor|steer"
 
 # Extract the first line of the commit message
 FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE")
@@ -28,7 +28,7 @@ FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE")
 if ! echo "$FIRST_LINE" | grep -qE "^($VALID_TYPES)(\(.+\))?: .+$"; then
   echo "Error: Commit message does not follow semantic convention."
   echo "Valid format: <type>[optional scope]: <description>"
-  echo "Valid types: revert, fix, feat, increment, ops, qa, refactor"
+  echo "Valid types: revert, fix, feat, increment, ops, qa, refactor, steer"
   echo "Example: feat: add new feature"
   echo "Your commit message: $FIRST_LINE"
   exit 1
