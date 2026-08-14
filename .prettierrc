@@ -5,13 +5,5 @@
     "htmlWhitespaceSensitivity": "css",
     "singleQuote": true,
     "printWidth": 90,
-    "trailingComma": "all",
-    "overrides": [
-        {
-            "files": "*.md",
-            "options": {
-                "proseWrap": "always"
-            }
-        }
-    ]
+    "trailingComma": "all"
 }
