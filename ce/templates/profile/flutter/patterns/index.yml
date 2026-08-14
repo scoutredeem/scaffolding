@@ -1,0 +1,25 @@
+root:
+  error_handling:
+    description: Error state handling in managers, custom exceptions, and user feedback
+  linting:
+    description: Analyzer options, lint rules, and generated file exclusions
+  local_persistence:
+    description: hive_ce key-value storage for prefs, caches, and local data
+  localization:
+    description: ARB-based l10n setup, string keys, and BuildContext extensions
+  managers:
+    description: Reactive Signal state, business logic, and service orchestration for screens
+  models:
+    description: Plain Dart data classes for domain entities and API deserialization
+  organization:
+    description: Feature folder structure, MVVM layering, and signals state management
+  routing:
+    description: go_router setup, route constants, shell routes, and navigation patterns
+  service_location:
+    description: GetIt registration, singleton lifecycle, and dependency resolution
+  services:
+    description: SDK wrappers, HTTP clients, device APIs, and local data I/O
+  testing:
+    description: Widget tests, unit tests, mocktail mocks, and GetIt test doubles
+  widgets:
+    description: Screen and UI widget structure, build method discipline, and lifecycle order
