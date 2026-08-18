@@ -1,10 +1,10 @@
 # Resolve change name
 
-Parse `$ARGUMENTS` as literal tokens, then resolve them **board-first** against `.flow/tracker.yml`. The first positional token maps to `.flow/changes/<change-name>/`.
+Parse `$ARGUMENTS` as literal tokens, then resolve them _tracker-first_ against `.flow/tracker.yml`. The first positional token maps to `.flow/changes/<change-name>/`.
 
-- **Omitted** → run the candidate-proposal flow (see Name convention). No seed.
-- **A bare token that exactly matches an entry `name` in `.flow/tracker.yml`** → a board pointer. Adopt that `name` verbatim — it is already canonical, so skip the sanitizer — and read the entry's one-line `description` as the opening seed (the signal the interview consumes in place of the scoping question). The entry already exists, so the closing board back-fill leaves it untouched.
-- **Anything else** → a seed, never a final answer. A bare token is a proposed name: run it through the sanitizer (see Name convention), surface the transformed name, confirm. A phrase with spaces is an inline description: draft candidate names from it (see Name convention).
+- _Omitted_ → run the candidate-proposal flow (see Name convention). No seed.
+- _A bare token that exactly matches an entry `name` in `.flow/tracker.yml`_ → a tracker pointer. Adopt that `name` verbatim — it is already canonical, so skip the sanitizer — and read the entry's one-line `description` as the opening seed (the signal the interview consumes in place of the scoping question).
+- _Anything else_ → a seed, never a final answer. A bare token is a proposed name: run it through the sanitizer (see Name convention), surface the transformed name, confirm. A phrase with spaces is an inline description: draft candidate names from it (see Name convention).
 
 The resolved argument only seeds the brief's opening — it never shortcuts the journey interview, and a name is always confirmed, never lifted raw from prose.
 
@@ -14,7 +14,9 @@ First action: echo `Drafting brief for change=<name>`.
 
 ## Name convention
 
-Change folder names follow lowercase-kebab-case: `[a-z][a-z0-9]*(-[a-z0-9]+)*`. Lowercase letters, digits, single hyphens separating words. No underscores, spaces, uppercase, dots, slashes. No leading or trailing hyphens, no doubled hyphens. Starts with a letter, not a digit. Short and content-bearing: 2–5 words, no `add-` / `update-` / `fix-` / `new-` / `remove-` prefixes — the folder name describes what the change touches, not how. Examples: ✅ `archived-categories`, ✅ `payment-retry-window`. ❌ `add-archived-categories`, ❌ `UserProfile`, ❌ `user_profile`.
+Change folder names follow lowercase-kebab-case: `[a-z][a-z0-9]*(-[a-z0-9]+)*`. Lowercase letters, digits, single hyphens separating words. No underscores, spaces, uppercase, dots, slashes. No leading or trailing hyphens, no doubled hyphens. Starts with a letter, not a digit. Short and content-bearing: 2–5 words, no `add-` / `update-` / `fix-` / `new-` / `remove-` prefixes — the folder name describes what the change touches, not how.
+
+Examples: ✅ `archived-categories`, ✅ `payment-retry-window`. ❌ `add-archived-categories`, ❌ `UserProfile`, ❌ `user_profile`.
 
 ### Candidate proposal (when `<change-name>` is omitted)
 
@@ -47,9 +49,7 @@ Apply this deterministic transform:
 5. If the result is empty, a single character, or starts with a digit, ask again — do not proceed with a malformed name.
 6. If a verb prefix is detected (`add-`, `update-`, `fix-`, `new-`, `remove-`), strip it and note inline: "dropped the `<prefix>-` prefix per the name convention — name is the noun, not the verb."
 
-Surface the transformed name and confirm before creating the folder (single-step yes/no,
-not a multi-choice prompt). On rejection, accept a different name — which re-enters
-sanitization.
+Surface the transformed name and confirm before creating the folder (single-step yes/no, not a multi-choice prompt). On rejection, accept a different name — which re-enters sanitization.
 
 Examples:
 
@@ -60,4 +60,7 @@ Examples:
 - `profile/v2` → `profile-v2` (confirm).
 - `42-things` → ask again ("name must start with a letter").
 
-Finally, create the folder if it does not exist and ensure `.flow/tracker.yml` has an entry for this change — identity only (`name` and a one-line `description`), idempotent on `name`. If an entry already exists, leave it untouched.
+## Persist the name
+
+We refer to the folder at `.flow/changes/<change-name>/` as the **change folder**. If it does not exist yet, create it now.
+Ensure `.flow/tracker.yml` has an entry for this change — identity only (`name` and a one-line `description`), idempotent on `name`. If an entry already exists, leave it untouched.
