@@ -1,8 +1,8 @@
-## Output
+# Write
 
-Before writing, scan the draft for framework names, model names, route shapes, column names, and delivery-mechanic words ("inline", "toast", "form field", "spinner", "skeleton"). Any hit means contamination — revise to product-level before writing the file.
+Scan the draft for framework names, model names, route shapes, column names, and delivery-mechanic words (inline, toast, spinner, skeleton). Any hit is contamination — rewrite that line as what the user sees or decides, then scan again.
 
-Write to `.flow/changes/<change-name>/brief.md` with this exact frontmatter and section structure:
+Write `.flow/changes/<change-name>/brief.md` with this frontmatter and structure:
 
 ```markdown
 ---
@@ -29,11 +29,9 @@ briefed: <YYYY-MM-DD>
 
 ## Constraints the journey places on implementation
 
-[Rules the implementation must honor, in product terms. What the constraint is, never how to satisfy it. Validation rules and the exact user-facing messages live here; how those messages surface (inline, toast, page) does not.]
+[Rules the implementation must honor, in product terms. What the constraint is. Validation rules and the exact user-facing messages live here; how those messages surface does not.]
 ```
 
-`briefed:` is today's date (`<YYYY-MM-DD>`) — it records when the journey was settled, so the lifecycle timeline can date the `briefed` stage. Set it once, on first write; do not rewrite it on later edits.
+`briefed:` is today's date (`YYYY-MM-DD`). Set it once, on first write; later writes leave it. If the user chose append, keep the existing sections and add `## Follow-up` rather than replacing the file.
 
-The output is a journey and the constraints it produces. The blueprint is a separate phase and gets to make its own technical choices freshly.
-
-If `.flow/changes/<change-name>/` does not exist, create it before writing.
+Write is done when `brief.md` has every required section, the contamination scan is clean, and `briefed:` is set.
