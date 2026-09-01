@@ -169,8 +169,8 @@ Produce a non-technical brief for a new change using `/flow-brief`:
 
 - Picks an unspecced milestone from the **tracker** and turns it into a well-named change or creates a new well-named change on the **tracker**.
 - Query the correct branch name and update the tracker. @V2
-- Determines if this brief is steered by design and hands off to `/brief-from-design` @HMW
-- Otherwise grill the user with docs on the milestone focussing on the desired behaviour (what the user does and sees)
+- Optionally gathers Figma design links and pre-reads frame structure before the interview
+- Grills the user with docs on the milestone focussing on the desired behaviour (what the user does and sees)
 - Creates a change folder containing a non-technical `brief.md`.
 - Updates the **tracker**
 - Offers to stop or continue with `/flow-build`
@@ -208,7 +208,7 @@ Spawns a code-standards review with `/code-review` and a FQA with `/fqa`
 4. `/flow-review` - Review a build
 
 - `/to-milestones`
-- `/brief-from-design`
+- `/brief-from-design` — superseded by optional Figma intake in `/flow-brief`
 - `/fqa`
 - `/code-review`
 - `/ship-it`
