@@ -2,7 +2,11 @@
 
 Read `CONTEXT.md` for vocabulary (and `CONTEXT-MAP.md` if it exists). When a term is coined, conflicts with the glossary, or a hard-to-reverse trade-off appears, use the **domain-modeling** skill.
 
+If appending to an existing `brief.md`, read it first — carry forward resolved steps; interview only gaps and follow-up.
+
 Walk the **journey** in order, entry point to completion. At each step, resolve: what the user sees, what they can do, what state they are in, success, and failure. Failure modes attach to the step they occur on. A step is resolved before the next is opened. A vague answer is still open.
+
+When a **design map** exists, seed "what the user sees" from frame names, visible copy, and annotations — then confirm: _"From Figma frame '<name>' — is this what the user sees here?"_ Treat the map as draft until confirmed. Figma covers observable UI; **Interview** still owns rules, messages, rejected alternatives, and failure modes.
 
 When a decision surfaces, name the alternatives as a **Choice**, recommend one, record why. Example: `archive vs delete — archive chosen; users need to restore mis-archived rows within 30 days`.
 
@@ -28,4 +32,4 @@ Calibration:
 
 Would the user notice or care? If yes, it is product. If no, hold it for **blueprint**.
 
-Interview is done when every step of the **journey** has see / do / state / success / failure resolved, every **Choice** is recorded with rejected alternatives and why, and no vague answer is standing.
+Interview is done when every step of the **journey** has see / do / state / success / failure resolved, every **Choice** is recorded with rejected alternatives and why, design-map inferences are confirmed or corrected, and no vague answer is standing.
