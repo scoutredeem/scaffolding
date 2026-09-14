@@ -1,6 +1,6 @@
 # Design
 
-Ask once: _"Is there a Figma design for this **journey**? Paste a link, or say none."_ If appending to an existing `brief.md`, read its `design:` block first — a new link adds anchors to that same map; don't re-ask if the user already answered this question earlier in the run.
+Ask once: _"Is there a Figma design for this **journey**? Paste a link, or say none."_ If appending to an existing `brief.md`, read its `design:` block first — a new link adds anchors to that same map; don't re-ask if the user already answered this question earlier in the run. A Figma URL already in the **change folder** is the answer — confirm the link.
 
 **None** → empty **design map**. Design is done.
 

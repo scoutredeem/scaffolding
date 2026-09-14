@@ -2,7 +2,7 @@
 
 Read `CONTEXT.md` for vocabulary (and `CONTEXT-MAP.md` if it exists). When a term is coined, conflicts with the glossary, or a hard-to-reverse trade-off appears, use the **domain-modeling** skill.
 
-If appending to an existing `brief.md`, read it first — carry forward resolved steps; interview only gaps and follow-up.
+Read documents in the **change folder**. An existing `brief.md` is resolved steps — interview only gaps and follow-up. Other files seed the walk; confirm before they count. Treat them as draft until confirmed.
 
 Walk the **journey** in order, entry point to completion. At each step, resolve: what the user sees, what they can do, what state they are in, success, and failure. Failure modes attach to the step they occur on. A step is resolved before the next is opened. A vague answer is still open.
 

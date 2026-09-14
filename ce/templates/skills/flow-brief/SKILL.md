@@ -20,8 +20,9 @@ Open only the current step's file. The step is locked when its completion criter
 
 1. **Name** — `steps/resolve_name.md`
 2. **Scope** — `steps/scope_check.md`
-3. **Design** — `steps/design_intake.md`
-4. **Interview** — `steps/interview.md`
-5. **Write** — `steps/output.md`
+3. **Prep** — `steps/prep.md`
+4. **Design** — `steps/design_intake.md`
+5. **Interview** — `steps/interview.md`
+6. **Write** — `steps/output.md`
 
-When Write is locked, offer `/flow-build` or stop.
+When Prep is parked, stop. When Write is locked, offer `/flow-build` or stop.
