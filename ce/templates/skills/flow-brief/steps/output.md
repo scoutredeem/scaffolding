@@ -4,7 +4,7 @@ Scan the draft for framework names, model names, route shapes, column names, and
 
 Write `.flow/changes/<change-name>/brief.md` with this frontmatter and structure.
 
-When Figma was supplied (see **Design** step), include the `design` block and `## Design references`. When the user said none, omit both.
+When Figma was supplied (see **Prep**), include the `design` block and `## Design references`. When the user said none, omit both.
 
 ```markdown
 ---
