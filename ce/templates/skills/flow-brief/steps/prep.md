@@ -1,14 +1,27 @@
 # Prep
 
-**Choice** whether this run continues into the briefing. No recommendation — the user is the readiness signal. Name files already in the **change folder** when presenting. A Figma URL already in the folder, or a `design:` block in `brief.md`, is the answer — confirm it (a new link adds anchors to that map).
+A non-empty `prep.md` already in the **change folder** is a prep run already done — skip straight to Interview, no choice needed.
+
+Otherwise, **Choice** whether this run continues into the briefing. No recommendation — the user is the readiness signal. Name any other files already in the **change folder** when presenting. A Figma URL already in the folder, or a `design:` block in `brief.md`, is the answer — confirm it (a new link adds anchors to that map).
 
 A — continue: paste a Figma link, or say none
-B — intake: paste notes or point at files, then park
-C — park: stop; notes can be added in the change folder later
+B — intake: I'll create a prep file for you, then park
 
 Wait.
 
-**Intake** — wait for the notes. Write pasted text to `prep.md` (append if it exists). Files they placed in the folder stay as they are. Then park.
+**Intake** — write `prep.md` as a blank scaffold for the user to fill in directly, then park:
+
+```markdown
+# Prep
+
+## Figma
+<!-- paste a Figma link here, or leave blank -->
+
+## Notes
+<!-- context, constraints, decisions to carry into the brief -->
+```
+
+Placeholders only — do not fabricate content. If `prep.md` already exists but is empty, overwrite it; leave any other files in the folder as they are.
 
 **Park** — stop this run. Echo `.flow/changes/<change-name>/` and that `/flow-brief <name>` resumes.
 
@@ -28,4 +41,4 @@ With MCP:
 
 Multiple frames could own this **journey** → **Choice** which are in scope. Recommend the frame the name or annotation marks as current (e.g. not `old`/`deprecated`/a superseded version number) or the one matching behavior already in `brief.md`. Neither signal present → no recommendation is honest; ask which is current. Wait.
 
-Prep is done when this run is parked and any notes from this turn are in the **change folder**, or the user chose continue and the **design map** is ready — empty on none or MCP failure, otherwise `figma_url` recorded (`file_key` when parseable) and **anchors** identified.
+Prep is done when `prep.md` was already non-empty at the start of this run, or this run parked after writing the intake scaffold, or the user chose continue and the **design map** is ready — empty on none or MCP failure, otherwise `figma_url` recorded (`file_key` when parseable) and **anchors** identified.
