@@ -1,11 +1,11 @@
 ---
 name: flow-review
-description: Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side.
+description: Review the changes since a fixed point (commit, branch, tag, or merge-base; offers develop, else main), including staged and unstaged work, along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side.
 disable-model-invocation: true
 user_invocable: true
 ---
 
-Two-axis review of the diff between `HEAD` and a fixed point I supply:
+Two-axis review of the changes since a fixed point (offers `develop`, else `main`), including uncommitted work:
 
 - **Standards** — does the code conform to this repo's documented coding standards?
 - **Spec** — does the code faithfully implement the originating brief in the **change folder**?
@@ -16,11 +16,19 @@ Both axes run as _parallel sub-agents_ so they don't pollute each other's contex
 
 ### 1. Pin the fixed point
 
-Whatever I said is the fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. If I didn't specify one, ask for it.
+Whatever I said is the fixed point — a commit SHA, branch name, tag, `main`, `HEAD~5`, etc. If I didn't specify one:
 
-Capture the diff command once: `git diff <fixed-point>...HEAD` (three-dot, so the comparison is against the merge-base). Also note the list of commits via `git log <fixed-point>..HEAD --oneline`.
+- On a branch other than `develop` or `main` → offer `develop` as the fixed point if it exists (`git rev-parse --verify develop`), otherwise `main`. Proceed once I confirm, or use whatever I name instead.
+- On `develop` or `main` itself → ask for it.
 
-Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and the diff is non-empty. A bad ref or empty diff should fail here — not inside two parallel sub-agents.
+The change under review may still be uncommitted — staged, unstaged, or both — so diff the merge-base against the **working tree**, not `HEAD`:
+
+- Resolve the base once: `git merge-base <fixed-point> HEAD`.
+- Diff command: `git diff <base>` — covers commits since the base plus staged and unstaged edits.
+- Commit list: `git log <base>..HEAD --oneline` (may be empty if nothing is committed yet).
+- New files: `git ls-files --others --exclude-standard` — untracked files are invisible to `git diff`; the sub-agents read them in full.
+
+Before going further, confirm the fixed point resolves (`git rev-parse <fixed-point>`) and there's something to review — a non-empty diff or at least one untracked file. A bad ref or empty change should fail here — not inside two parallel sub-agents.
 
 ### 2. Identify the spec source
 
@@ -60,13 +68,13 @@ Send a single message with two `Agent` tool calls. Use the `general-purpose` sub
 
 _Standards sub-agent prompt_ — include:
 
-- The full diff command and commit list.
+- The full diff command, commit list, and untracked-file list.
 - The list of standards-source files you found in step 3, _plus the smell baseline from step 3_ pasted in full — the sub-agent has no other access to it.
 - The brief: "Report — per file/hunk where relevant — (a) every place the diff violates a documented standard: cite the standard (file + the rule); and (b) any baseline smell you spot: name it and quote the hunk. Distinguish hard violations from judgement calls — documented-standard breaches can be hard, but baseline smells are always judgement calls, and a documented repo standard overrides the baseline. Skip anything tooling enforces. Under 400 words."
 
 _Spec sub-agent prompt_ — include:
 
-- The diff command and commit list.
+- The diff command, commit list, and untracked-file list.
 - The path or fetched contents of the spec.
 - The brief: "Report: (a) requirements the spec asked for that are missing or partial; (b) behaviour in the diff that wasn't asked for (scope creep); (c) requirements that look implemented but where the implementation looks wrong. Quote the spec line for each finding. Under 400 words."
 
