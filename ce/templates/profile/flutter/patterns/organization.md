@@ -21,8 +21,12 @@ lib/
     app.dart                     # MaterialApp.router — theme, localization, router wiring
     shared/
       routes.dart                # GoRouter definition (all routes in one place)
-      styles.dart                # ThemeData definitions (light/dark)
-      extensions.dart            # Shared BuildContext and String extensions
+      styles.dart                # buildAppTheme(), ColorScheme + ThemeExtensions (light/dark)
+      extensions.dart            # Shared BuildContext extensions (appColors, appType, tr)
+      models/
+        async_state.dart         # Sealed AppAsyncState<T> for async actions
+      widgets/
+        error_banner.dart        # Shared inline error display
       services/
         service_locator.dart     # GetIt registration — all singletons registered here
         store_service.dart       # Local persistence — hive_ce key-value store
@@ -55,32 +59,6 @@ The app is crafted along a layered MVVM architecture:
 
 ## State management
 
-- Use the `signals` package to manage shared state
-- A screen's state and business logic is kept in it's manager file
-- Use getters and setters to access Signal values
-- Never use `setState` or other state managers in managers
-- Signals propagate automatically — no `notifyListeners()`, no `setState()`, no `StreamBuilder`.
-
-example manager state:
-
-```dart
-// Manager — expose signals as typed getters
-class HomeManager {
-  final _itemsSignal = Signal<List<Item>>([]);
-  List<Item> get items => _itemsSignal.value;
-
-  final _loadingSignal = Signal<bool>(false);
-  bool get loading => _loadingSignal.value;
-
-  Future<void> load() async {
-    _loadingSignal.value = true;
-    _itemsSignal.value = await _service.fetchItems();
-    _loadingSignal.value = false;
-  }
-}
-```
-
-In the manager's screen:
-
-- use get<IndexManager>() to resolve managers and services from the get_it service locator
-- the build tree use SignalBuilder((\_) { ... }) from signals to trigger rebuilds
+- Use the `signals` package to manage shared state, kept in the feature's manager. See `managers.md`.
+- Async actions and their loading/error states use `AppAsyncState`. See `error_handling.md`.
+- Colors and text styles come from the theme via `context.appColors` and `context.appType`. See `styles.md`.

@@ -1,6 +1,6 @@
 root:
   error_handling:
-    description: Error state handling in managers, custom exceptions, and user feedback
+    description: AppAsyncState sealed states, catching errors in managers, cache fallback, and user feedback
   linting:
     description: Analyzer options, lint rules, and generated file exclusions
   local_persistence:
@@ -8,18 +8,20 @@ root:
   localization:
     description: ARB-based l10n setup, string keys, and BuildContext extensions
   managers:
-    description: Reactive Signal state, business logic, and service orchestration for screens
+    description: Signal and computed state, AppAsyncState per action, business logic, and service orchestration
   models:
     description: Plain Dart data classes for domain entities and API deserialization
   organization:
-    description: Feature folder structure, MVVM layering, and signals state management
+    description: Feature folder structure and MVVM layering
   routing:
     description: go_router setup, route constants, shell routes, and navigation patterns
   service_location:
     description: GetIt registration, singleton lifecycle, and dependency resolution
   services:
     description: SDK wrappers, HTTP clients, device APIs, and local data I/O
+  styles:
+    description: Theme setup, ColorScheme plus ThemeExtension tokens, and styling widgets via context.appColors/appType
   testing:
     description: Widget tests, unit tests, mocktail mocks, and GetIt test doubles
   widgets:
-    description: Screen and UI widget structure, build method discipline, and lifecycle order
+    description: Screen and UI widget structure, SignalBuilder, build method discipline, and lifecycle order
