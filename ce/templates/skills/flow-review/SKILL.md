@@ -82,9 +82,19 @@ If the spec is missing, skip the Spec sub-agent and note this in the final repor
 
 ### 5. Aggregate
 
-Present the two reports under `## Standards` and `## Spec` headings, verbatim or lightly cleaned. Do _not_ merge or rerank findings — the two axes are deliberately separate (see _Why two axes_).
+Present the reports under `## Standards` and `## Spec`. Keep their finding classes separate and assign every finding a report-local ID:
 
-End with a one-line summary: total findings per axis, and the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent.
+- `## Standards`
+  - `### Violations` — `V1`, `V2`, …
+  - `### Judgement calls` — `J1`, `J2`, …
+- `## Spec`
+  - `### Missing or partial` — `M1`, `M2`, …
+  - `### Scope creep` — `C1`, `C2`, …
+  - `### Incorrect implementation` — `I1`, `I2`, …
+
+Within each class, use an ordered list whose items begin with the bold ID: `1. **J1** — ...`. Preserve the sub-agents' order; lightly clean and sort each finding into its class, but do _not_ merge or rerank findings across classes or axes. Omit an empty class. If an entire axis has no findings, write `No findings.` If the Spec review was skipped, write `Not reviewed — no spec available.`
+
+End with a one-line summary: total findings per axis, and the ID of the worst issue _within each axis_ (if any). Don't pick a single winner across axes — that's the reranking the separation exists to prevent. The report is complete when every finding has exactly one ID and every ID named in the summary exists in the report.
 
 ## Why two axes
 
