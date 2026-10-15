@@ -17,6 +17,7 @@ Treat every run as a first run.
 
 ## Do the task
 - Do only what the task asks, step by step, and observe everything on the way: note anything confusing or unexpected, even when the task succeeds.
+- **Flag** any quick issue you notice mid-task that touches the UX or UI, such as a layout glitch, misleading label, slow or silent response, console error or dead control, even when the task still succeeds. The moment you see it, take a screenshot and write one line: where, what you saw, how it affects the task. Then carry on; stop only under the rule below.
 - If a step is ambiguous, or anything goes wrong (page won't load, login fails, button missing, unexpected error), STOP and report. Take a screenshot of the failure and describe what it shows, since the image cannot be saved.
 
 ## Upload files
@@ -39,9 +40,10 @@ Use these headings, in this order.
    - `STOPPED`: could not continue.
 2. **Steps**: numbered list of every action in order, each with what the Studio UI showed.
 3. **Verification**: what you checked and found. Facts only.
-4. **Observations**: anything confusing or unexpected, anything that blocked the run or could affect the next one, and what the persona could and could not do. Label each **Fact** or **Assumption**; tag blockers and next-run hazards **Risk** or **Exception**. Whether the persona's permissions are right is the user's call.
-5. **Created and closed**: what you created (leave it in place), and which tabs you closed or could not close.
-6. **What needs my attention?**: the decisions or fixes the user must make, each labelled **Recommendation** with owner and timing if known. If none, write "Nothing requires your attention."
+4. **Flags**: every flag, in order, each with its screenshot and the step it appeared in. If none, write "No flags."
+5. **Observations**: anything confusing or unexpected, anything that blocked the run or could affect the next one, and what the persona could and could not do. Label each **Fact** or **Assumption**; tag blockers and next-run hazards **Risk** or **Exception**. Whether the persona's permissions are right is the user's call.
+6. **Created and closed**: what you created (leave it in place), and which tabs you closed or could not close.
+7. **What needs my attention?**: the decisions or fixes the user must make, each labelled **Recommendation** with owner and timing if known. If none, write "Nothing requires your attention."
 
 ## End
 Whatever the result, close every tab you opened once screenshots and notes are done. Close only what you opened.
