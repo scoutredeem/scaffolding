@@ -1,6 +1,6 @@
 ---
 name: qa-alex
-description: Run a browser QA pass on local Studio as Alex, a content editor.
+description: Blind browser QA on local Studio as Alex, a content editor.
 disable-model-invocation: true
 ---
 
@@ -8,12 +8,11 @@ disable-model-invocation: true
 
 Before the first step, read `../qa-persona/PROTOCOL.md` and follow it as written.
 
+The task is: $ARGUMENTS. If empty, ask what to test before opening the browser.
+
 ## Persona config
 - Name: Alex
 - Role: content editor
 - Product: Studio
 - URL: http://localhost:3333
 - Login: alex@thehive.app / passwordAlex
-
-## Persona angle
-In Observations, record what Alex could and could not do. Report it as fact; leave the judgement of whether the permissions are correct to the user.
