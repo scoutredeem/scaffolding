@@ -118,6 +118,9 @@ Install script:
     - clone/pull from scaffold
     - symlink them for claude `~/.claude/skills/`
 
+`qa-persona` is not a skill (no `SKILL.md`) but the shared protocol for `qa-sally` and `qa-alex`. Symlink it alongside them, as a sibling, so their `../qa-persona/PROTOCOL.md` pointer resolves.
+Runs that upload files need `qa-persona/media` connected to the chat as a folder; the browser upload tool rejects unshared paths.
+
 As per the [Agents Skills Standard][2] the skills will be picked up automatically by cursor, codex, gemini, but not claude so we need to symlink into ~/.claude/skills/
 
 ### Pattern Docs
@@ -214,3 +217,5 @@ Spawns a code-standards review with `/code-review` and a FQA with `/fqa`
 - `/ship-it`
 - `/document`
 - `/flow-status`
+- `/qa-sally` — blind browser QA on local Studio as Sally, a ministry admin (user-invoked; shares `qa-persona/PROTOCOL.md`)
+- `/qa-alex` — blind browser QA on local Studio as Alex, a content editor (user-invoked; shares `qa-persona/PROTOCOL.md`)
