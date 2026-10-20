@@ -4,6 +4,14 @@ Scripts and templates we use to enforce standards and get a running start.
 
 ## Gallery
 
+Studio QA runner:
+
+```
+cd agentic/studio-qa
+claude --chrome
+sally, publish a Terms & Conditions page for us
+```
+
 New Flutter project:
 
 ```
