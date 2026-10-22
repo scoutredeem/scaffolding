@@ -3,7 +3,7 @@
 Parse `$ARGUMENTS` as literal tokens. The first positional token maps to `.flow/changes/<change-name>/`. Resolve **tracker-first**: **Look up** the token.
 
 - _Omitted_ → **Choice** of 2–3 candidate names (Name convention). No seed. If you have no signal, ask one scoping question first, then propose.
-- _**Look up** finds an entry_ → adopt the name verbatim. The entry's one-line description is the interview seed.
+- _**Look up** finds an entry_ → adopt the entry's name verbatim, not the token. The entry's one-line description is the interview seed.
 - _Anything else_ → a seed, never the final name. A bare token is a proposed name: sanitize, surface the transformed name, confirm (yes/no). A phrase with spaces is an inline description: draft candidates from it (Name convention).
 
 A tracker pointer is already canonical. Every other name is confirmed.
