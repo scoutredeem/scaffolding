@@ -6,7 +6,7 @@ Before generating or writing any code, look through `.flow/patterns/index.yml` t
 
 ### Progress tracker
 
-Planned and in-flight changes to this product are tracked in a yaml file. See `docs/agents/tracker.md`.
+Planned and in-flight changes to this product are tracked on the tracker. See `docs/agents/tracker.md`.
 
 ### Domain docs
 

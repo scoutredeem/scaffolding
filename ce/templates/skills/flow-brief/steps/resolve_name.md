@@ -1,9 +1,9 @@
 # Name
 
-Parse `$ARGUMENTS` as literal tokens. The first positional token maps to `.flow/changes/<change-name>/`. Resolve **tracker-first** against `.flow/tracker.yml`.
+Parse `$ARGUMENTS` as literal tokens. The first positional token maps to `.flow/changes/<change-name>/`. Resolve **tracker-first**: **Look up** the token.
 
 - _Omitted_ → **Choice** of 2–3 candidate names (Name convention). No seed. If you have no signal, ask one scoping question first, then propose.
-- _Exact match on a tracker `name`_ → adopt it verbatim. The entry's one-line `description` is the interview seed.
+- _**Look up** finds an entry_ → adopt the entry's name verbatim, not the token. The entry's one-line description is the interview seed.
 - _Anything else_ → a seed, never the final name. A bare token is a proposed name: sanitize, surface the transformed name, confirm (yes/no). A phrase with spaces is an inline description: draft candidates from it (Name convention).
 
 A tracker pointer is already canonical. Every other name is confirmed.
@@ -33,8 +33,6 @@ Examples: `UserProfile` → `user-profile`; `update-user-profile` → `user-prof
 
 ## Persist
 
-Create `.flow/changes/<change-name>/` if needed. We call that folder the **change folder**.
+Create `.flow/changes/<change-name>/` if needed. We call that folder the **change folder**. A new name is registered on the **tracker** at **Write**, once the brief exists.
 
-Ensure `.flow/tracker.yml` has an identity entry (`name` + one-line `description`). Idempotent on `name` — an existing entry is left untouched.
-
-Name is done when the **change folder** exists, the **tracker** has this `name`, and the name is confirmed (or was a tracker pointer).
+Name is done when the **change folder** exists and the name is confirmed (or was a tracker pointer).

@@ -1,6 +1,6 @@
 # Tracker
 
-Planned and in-flight changes to this product are tracked in a yaml file that is located at `.flow/tracker.yml`
+Planned and in-flight changes to this product are tracked in a yaml file at `.flow/tracker.yml`. To track them somewhere else, replace this doc with one that defines the same operations.
 
 ## Example
 
@@ -20,9 +20,20 @@ changes:
     description: Retry failed card charges within a configurable window
 ```
 
+## Change name
+
+A change name is the entry's `name`. The change folder is `.flow/changes/<change-name>/`.
+
+## Operations
+
+Skills that use the tracker call these operations.
+
+- **Look up** `<name>`: read `.flow/tracker.yml` and match the `changes` entry whose `name` equals `<name>` exactly. Its `description` is the one-line description. If the file or entry is missing, there is no entry.
+- **Register** `<name>` with a one-line description: if Look up finds the entry, leave it as it is. Otherwise append `name` and `description` to `changes`, creating the file if it is missing.
+- **Drop** `<name>`: do not edit the file. The entry stays as the change's record. It has landed once its change folder is in `.flow/archive/`.
+
 ## Inferred progress status
 
-A change can be in one of two states of progress:
-
-- **in-flight** - there is a folder at `.flow/changes/<name>` that corresponds exactly to the change name
-- **planned** - there is no `.flow/changes/<name>` folder and the change name has not landed
+- **in-flight**: a folder at `.flow/changes/<name>` corresponds exactly to the change name.
+- **planned**: the entry has no change folder in `.flow/changes/` or `.flow/archive/`.
+- **landed**: the change folder has been archived to `.flow/archive/`.
