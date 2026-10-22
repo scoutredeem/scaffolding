@@ -16,4 +16,4 @@ Explain the tradeoff in plain language: fewer milestones = larger one-shot sessi
 
 Wait for me to pick the granularity.
 
-After you have my answer, add the milestones as changes on the tracker.
+After you have my answer, **Register** each milestone as a change on the tracker, with a change name and a one-line description. The tracker and its **Register** operation are described in `docs/agents/tracker.md`.

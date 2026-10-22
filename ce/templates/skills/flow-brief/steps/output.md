@@ -59,6 +59,6 @@ If the user chose append: new content that extends an already-documented journey
 
 Merge new **anchors** into `design.anchors` and the table when appending. An anchor whose `node_id` matches one already recorded updates that entry in place (never duplicated). Every anchor's `journey_step` matches an actual heading in `## The journey, step by step` — never a `## Follow-up` label standing in for one.
 
-Ensure `.flow/tracker.yml` still has this change's `name` entry (idempotent — create only if missing).
+**Register** this change's name on the **tracker**, with a one-line description of the journey. An existing entry is left as it is.
 
-Write is done when `brief.md` has every required section for this run (including `## Design references` when Figma was supplied), appended content lives in an existing step or in `## Follow-up` per the rule above, the contamination scan is clean, `briefed:` is set, and the tracker entry exists.
+Write is done when `brief.md` has every required section for this run (including `## Design references` when Figma was supplied), appended content lives in an existing step or in `## Follow-up` per the rule above, the contamination scan is clean, `briefed:` is set, and **Look up** finds this change on the **tracker**.

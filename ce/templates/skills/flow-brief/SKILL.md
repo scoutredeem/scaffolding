@@ -16,6 +16,8 @@ B — delete: items are unrecoverable
 Pick A or B (or describe another option). Wait.
 ```
 
+**Tracker** — where planned and in-flight changes are recorded, described by `docs/agents/tracker.md`. Touch it only through that doc's **Look up** and **Register** operations. If the doc or an operation is missing, ask me where changes are tracked. Wait.
+
 Open only the current step's file. The step is locked when its completion criterion is met.
 
 1. **Name** — `steps/resolve_name.md`

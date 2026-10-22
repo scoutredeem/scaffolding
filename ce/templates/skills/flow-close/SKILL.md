@@ -1,11 +1,13 @@
 ---
 name: flow-close
-description: 'Archive a completed change into .flow/archive/ and drop it from the tracker.'
+description: 'Archive a completed change into .flow/archive/ and check where the tracker has it.'
 disable-model-invocation: true
 user_invocable: true
 ---
 
-**Archive** is mechanical: confirm the gates, move the **change** folder unchanged, drop it from the **tracker**. Any failed check is ARCHIVE PAUSED.
+**Archive** is mechanical: confirm the gates, move the **change** folder unchanged, check the **tracker**. Any failed check is ARCHIVE PAUSED.
+
+**Tracker** — where planned and in-flight changes are recorded, described by `docs/agents/tracker.md`. Archive only reads it, through that doc's **Drop** operation, and never creates, edits or deletes an entry.
 
 ## Identify the change
 
@@ -21,7 +23,7 @@ Once named, echo `Archiving change=<name>`. Identify is done when `.flow/changes
 
 ## ARCHIVE PAUSED
 
-The **archive** cannot proceed. Leave `.flow/changes/` and the **tracker** as they are.
+The **archive** cannot proceed. Leave `.flow/changes/` as it is.
 
 ```
 ARCHIVE PAUSED — <change-name>
@@ -59,14 +61,15 @@ Move is done when the folder is at the destination and gone from `.flow/changes/
 
 ## Tracker
 
-If `.flow/tracker.yml` has a `changes` entry whose `name` is `<change-name>`, delete that list item; leave every other entry as it is. If the file or entry is missing, proceed.
+Run **Drop** for `<change-name>`. Note anything it says is left for me. If the doc or **Drop** is missing, note that instead.
 
-The change folder is the **archive** record; this is the only other mutation.
+The change folder is the **archive** record; moving it is the only mutation.
 
-Tracker is done when `.flow/tracker.yml` has no entry for this change, or the file is absent.
+Tracker is done when **Drop** has run, or its absence is noted.
 
 ## Report
 
 - Change name
 - Destination path
+- What the **tracker** left for me to do, if anything
 - The **change** is filed; `.flow/changes/` holds only in-flight work
