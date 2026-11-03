@@ -4,9 +4,9 @@
 
 Before generating or writing any code, look through `.flow/patterns/index.yml` to decide which area of the codebase the change would touch and read the referenced document.
 
-### Progress tracker
+### Changes
 
-Planned and in-flight changes to this product are tracked in a yaml file. See `docs/agents/tracker.md`.
+Each change is a Linear issue. Its change name is the issue's `gitBranchName` (`sco-3205-placement-api-catalogue`), which names both the git branch and the change folder `.flow/changes/<change-name>/`. `/flow-prep <issue id>` sets both up.
 
 ### Domain docs
 

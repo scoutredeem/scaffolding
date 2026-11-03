@@ -21,7 +21,7 @@ A set of markdown files that describe the architecture and code patterns of the 
 _Avoid_: standards docs (Agent OS term), scaffold docs, harness docs (Adonis Flow term), convention docs
 
 **Change**:
-One bounded piece of work tracked from proposal to completion.
+One bounded piece of work, tracked as a Linear issue from proposal to completion. Its change name is the issue's `gitBranchName`, which also names the git branch and the change folder.
 _Avoid_: ticket, story, feature branch
 
 **Brief**:
@@ -35,10 +35,6 @@ _Avoid_: module, feature, domain, entity
 **State**:
 The long-lived, canonical behavior contract for one **capability** — current behavior only, with no history of how it got there.
 _Avoid_: state machine, spec, requirements doc
-
-**Tracker**:
-A registry of proposed and in-flight **changes**
-_Avoid_: backlog, kanban, board
 
 **Archive**:
 The mechanical step that files a fully-completed **change** into Flow's historical record, moved unchanged.
@@ -54,7 +50,6 @@ our-project/
 ├── CLAUDE.md                    # @AGENTS.md
 ├── docs/
 │   ├── agents/                            # Written once during installation
-│   │   ├── tracker.md                     # tracker conventions
 │   │   └── domain.md                      # explains about CONTEXT.md and ADRs
 │   ├── adr/                               # architectural decision records
 │   │   ├── 0001-postgres-for-write-model.md
@@ -64,11 +59,10 @@ our-project/
 │       ├── expenses.md
 │       └── team-settings.md
 └── .flow/
-    ├── tracker.yml                        # Planned and in-flight change tracker
     ├── changes/                           # In-flight work only
-    │   ├── payment-retry-window/
+    │   ├── sco-3205-payment-retry-window/
     │   │   └── brief.md
-    │   └── dark-mode/
+    │   └── sco-3088-dark-mode/
     │       └── brief.md
     ├── archive/                           # Completed changes — moved unchanged from /changes
     │   ├── 2026-03-15-categories/
@@ -156,7 +150,7 @@ Resolve in `/flow-blueprint` and others like this:
 
 Discover and document product scope and milestone list using `/v1`.
 
-When the skill senses that all descision trees have been explored it offers to split the explored work to the **tracker** as milestones. A tired user can also snapshot the context with `/handoff` and/or explicitly trigger `/to-milestones` to wrap up the grilling session. Commits changes on main branch and pushes.
+When the skill senses that all descision trees have been explored it offers to split the explored work into milestones, listed for you to file as Linear issues. A tired user can also snapshot the context with `/handoff` and/or explicitly trigger `/to-milestones` to wrap up the grilling session. Commits changes on main branch and pushes.
 
 Key outputs (AGENTS.md, README.md, CONTEXT.md, ADRs, milestone list):
 
@@ -166,16 +160,22 @@ Key outputs (AGENTS.md, README.md, CONTEXT.md, ADRs, milestone list):
 - out of scope list
 - list of milestones each with a name and short description
 
+### Prep (anyone)
+
+Set up a Linear issue as a change using `/flow-prep <issue id>`:
+
+- Audits the change name (the issue's `gitBranchName`) and renames the issue when it breaks the naming convention
+- Creates the change folder
+- Creates or switches to the git branch
+
 ### Brief (anyone)
 
-Produce a non-technical brief for a new change using `/flow-brief`:
+Produce a non-technical brief for the change on the current branch using `/flow-brief`:
 
-- Picks an unspecced milestone from the **tracker** and turns it into a well-named change or creates a new well-named change on the **tracker**.
-- Query the correct branch name and update the tracker. @V2
+- Reads the Linear issue and the change folder as the seed, and splits off extra journeys as issues for you to file
 - Optionally gathers Figma design links and pre-reads frame structure before the interview
 - Grills the user with docs on the milestone focussing on the desired behaviour (what the user does and sees)
-- Creates a change folder containing a non-technical `brief.md`.
-- Updates the **tracker**
+- Writes a non-technical `brief.md` into the change folder
 - Offers to stop or continue with `/flow-build`
 
 ### Build (dev, anyone)
@@ -183,7 +183,6 @@ Produce a non-technical brief for a new change using `/flow-brief`:
 Builds a brief to deliver a change using `/flow-build`:
 
 - Interviews the user to pick any required vendor packages. Clarifies test seams and implementation tradeoffs etc.
-- create/switch to the branch @V2
 - Builds a test for a tracer bullet implementation (test red)
 - Implement tracer (test green)
 - Write full test (test red)
@@ -198,7 +197,6 @@ Spawns a code-standards review with `/code-review` and a FQA with `/fqa`
 
 - Loop through review-and-fix till resolved @HMW
 - Human signs off with `/ship-it` which does:
-- Removes the change from the **tracker**
 - Merge the PR @V2
 - Tag a release @V2
 - Update state docs using `/document` @V2
@@ -206,9 +204,10 @@ Spawns a code-standards review with `/code-review` and a FQA with `/fqa`
 ## Skills
 
 1. `/flow-v1` - Scopes a fresh project and break into milestones
-2. `/flow-brief` - Specs out one change with a non-technical brief
-3. `/flow-build` - Implement a change brief with tests
-4. `/flow-review` - Review a build
+2. `/flow-prep` - Sets up a Linear issue as a change: name, folder and branch
+3. `/flow-brief` - Specs out one change with a non-technical brief
+4. `/flow-build` - Implement a change brief with tests
+5. `/flow-review` - Review a build
 
 - `/to-milestones`
 - `/brief-from-design` — superseded by optional Figma intake in `/flow-brief`

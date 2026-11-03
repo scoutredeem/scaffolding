@@ -4,7 +4,7 @@ Scan the draft for framework names, model names, route shapes, column names, and
 
 Write `.flow/changes/<change-name>/brief.md` with this frontmatter and structure.
 
-When Figma was supplied (see **Prep**), include the `design` block and `## Design references`. When the user said none, omit both.
+When Figma was supplied (see **Intake**), include the `design` block and `## Design references`. When the user said none, omit both.
 
 ```markdown
 ---
@@ -22,7 +22,7 @@ design:
       frame_name: "<name>"
 ---
 
-# <Change Name> — Brief
+# <Issue title> — Brief
 
 ## Entry point, user goal, status
 
@@ -59,6 +59,4 @@ If the user chose append: new content that extends an already-documented journey
 
 Merge new **anchors** into `design.anchors` and the table when appending. An anchor whose `node_id` matches one already recorded updates that entry in place (never duplicated). Every anchor's `journey_step` matches an actual heading in `## The journey, step by step` — never a `## Follow-up` label standing in for one.
 
-Ensure `.flow/tracker.yml` still has this change's `name` entry (idempotent — create only if missing).
-
-Write is done when `brief.md` has every required section for this run (including `## Design references` when Figma was supplied), appended content lives in an existing step or in `## Follow-up` per the rule above, the contamination scan is clean, `briefed:` is set, and the tracker entry exists.
+Write is done when `brief.md` has every required section for this run (including `## Design references` when Figma was supplied), appended content lives in an existing step or in `## Follow-up` per the rule above, the contamination scan is clean, and `briefed:` is set.

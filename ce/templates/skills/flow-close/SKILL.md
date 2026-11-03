@@ -1,11 +1,11 @@
 ---
 name: flow-close
-description: 'Archive a completed change into .flow/archive/ and drop it from the tracker.'
+description: 'Archive a completed change into .flow/archive/.'
 disable-model-invocation: true
 user_invocable: true
 ---
 
-**Archive** is mechanical: confirm the gates, move the **change** folder unchanged, drop it from the **tracker**. Any failed check is ARCHIVE PAUSED.
+**Archive** is mechanical: confirm the gates, move the **change** folder unchanged. Any failed check is ARCHIVE PAUSED.
 
 ## Identify the change
 
@@ -21,7 +21,7 @@ Once named, echo `Archiving change=<name>`. Identify is done when `.flow/changes
 
 ## ARCHIVE PAUSED
 
-The **archive** cannot proceed. Leave `.flow/changes/` and the **tracker** as they are.
+The **archive** cannot proceed. Leave `.flow/changes/` as it is.
 
 ```
 ARCHIVE PAUSED — <change-name>
@@ -45,7 +45,9 @@ Gates are done when I have confirmed both.
 
 ## Destination
 
-Archive date is today as `YYYY-MM-DD`. Destination: `.flow/archive/<date>-<change-name>/`.
+Archive date is today as `YYYY-MM-DD`. The date replaces the Linear issue id: `<slug>` is `<change-name>` without its `<team>-<number>-` prefix (or all of it when there is none). Destination: `.flow/archive/<date>-<slug>/`.
+
+Example: `.flow/changes/sco-3205-payment-retry-window/` → `.flow/archive/2026-03-15-payment-retry-window/`.
 
 If that path already exists → ARCHIVE PAUSED: a name collision in the archive.
 
@@ -56,14 +58,6 @@ Destination is done when that path does not exist.
 Create `.flow/archive/` if it does not exist. Move `.flow/changes/<change-name>/` to the destination — every file, content unchanged.
 
 Move is done when the folder is at the destination and gone from `.flow/changes/`.
-
-## Tracker
-
-If `.flow/tracker.yml` has a `changes` entry whose `name` is `<change-name>`, delete that list item; leave every other entry as it is. If the file or entry is missing, proceed.
-
-The change folder is the **archive** record; this is the only other mutation.
-
-Tracker is done when `.flow/tracker.yml` has no entry for this change, or the file is absent.
 
 ## Report
 

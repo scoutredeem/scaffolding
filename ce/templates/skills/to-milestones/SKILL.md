@@ -1,6 +1,6 @@
 ---
 name: to-milestones
-description: Turn the current conversation into a brief and break the goal up into a sequence of milestones on the tracker.
+description: Turn the current conversation into a brief and break the goal up into a sequence of milestones, listed in the response.
 disable-model-invocation: true
 user_invocable: true
 ---
