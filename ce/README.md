@@ -208,13 +208,11 @@ Spawns a code-standards review with `/code-review` and a FQA with `/fqa`
 3. `/flow-brief` - Specs out one change with a non-technical brief
 4. `/flow-build` - Implement a change brief with tests
 5. `/flow-review` - Review a build
+6. `/ship-it` — push the branch and open a PR with a CI-valid semantic title
 
 - `/to-milestones`
-- `/brief-from-design` — superseded by optional Figma intake in `/flow-brief`
-- `/fqa`
-- `/code-review`
-- `/ship-it`
-- `/document`
-- `/flow-status`
+- `/domain-modeling` — maintain `CONTEXT.md` and ADRs; model-invoked, reached by `/flow-brief`'s interview. downstream from [Matt Pocock][1]
 - `/qa-sally` — blind browser QA on local Studio as Sally, a ministry admin (user-invoked; shares `qa-persona/PROTOCOL.md`)
 - `/qa-alex` — blind browser QA on local Studio as Alex, a content editor (user-invoked; shares `qa-persona/PROTOCOL.md`)
+
+[1]: https://github.com/mattpocock/skills/tree/4ae2317ddb22b046e26455e4f9c9b3aaaf62212d/skills/engineering/domain-modeling
