@@ -16,4 +16,4 @@ Explain the tradeoff in plain language: fewer milestones = larger one-shot sessi
 
 Wait for me to pick the granularity.
 
-After you have my answer, add the milestones as changes on the tracker.
+After you have my answer, list the milestones in your response, in order, ready for me to file as Linear issues. For each: an issue title in the domain terms of `CONTEXT.md`, 2–5 words that name what it touches with no `Add` / `Update` / `Fix` / `New` / `Remove` prefix (Linear derives the branch and change name from it), and a one-line description.
