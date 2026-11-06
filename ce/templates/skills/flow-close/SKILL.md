@@ -45,9 +45,15 @@ Gates are done when I have confirmed both.
 
 ## Destination
 
-Archive date is today as `YYYY-MM-DD`. The date replaces the Linear issue id: `<slug>` is `<change-name>` without its `<team>-<number>-` prefix (or all of it when there is none). Destination: `.flow/archive/<date>-<slug>/`.
+Archive date is today as `YYYY-MM-DD`. A Linear prefix is a `<team>-<number>-` start to `<change-name>`: letters, a hyphen, digits, a hyphen (`sco-3205-`).
 
-Example: `.flow/changes/sco-3205-payment-retry-window/` → `.flow/archive/2026-03-15-payment-retry-window/`.
+- With a Linear prefix → the date replaces it: `.flow/archive/<date>-<rest of change-name>/`.
+- Without one → the date is appended: `.flow/archive/<change-name>-<date>/`.
+
+Examples:
+
+- `.flow/changes/sco-3205-payment-retry-window/` → `.flow/archive/2026-03-15-payment-retry-window/`
+- `.flow/changes/payment-retry-window/` → `.flow/archive/payment-retry-window-2026-03-15/`
 
 If that path already exists → ARCHIVE PAUSED: a name collision in the archive.
 
