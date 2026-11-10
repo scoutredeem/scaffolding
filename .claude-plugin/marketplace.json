@@ -1,0 +1,12 @@
+{
+  "name": "scaffolding",
+  "description": "Skills for the scaffolding flow.",
+  "owner": { "name": "scout+redeem" },
+  "plugins": [
+    {
+      "name": "flow",
+      "source": "./ce/templates",
+      "description": "Flow skills: prep, brief, build, review, close, ship-it and supporting skills for Linear-tracked changes."
+    }
+  ]
+}
