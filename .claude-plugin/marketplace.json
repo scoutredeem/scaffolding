@@ -1,7 +1,7 @@
 {
   "name": "scaffolding",
   "description": "Skills for the scaffolding flow.",
-  "owner": { "name": "Timothy" },
+  "owner": { "name": "scout+redeem" },
   "plugins": [
     {
       "name": "flow",
