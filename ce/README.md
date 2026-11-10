@@ -121,13 +121,6 @@ As per the [Agents Skills Standard][2] the skills will be picked up automaticall
 
 Instead of symlinking, Claude Code can load the skills from the `scaffolding` marketplace (defined in `.claude-plugin/marketplace.json` at the repo root). It ships one plugin, `flow`, whose root is `ce/templates` (manifest: `ce/templates/.claude-plugin/plugin.json`).
 
-From GitHub:
-
-```bash
-claude plugin marketplace add scoutredeem/scaffolding
-claude plugin install flow@scaffolding
-```
-
 From a local clone (use this while developing):
 
 ```bash
