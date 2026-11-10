@@ -1,0 +1,11 @@
+{
+  "name": "scaffolding",
+  "owner": { "name": "Timothy" },
+  "plugins": [
+    {
+      "name": "flow",
+      "source": "./ce/templates",
+      "description": "Flow skills: prep, brief, build, review, close, ship-it and supporting skills for Linear-tracked changes."
+    }
+  ]
+}
