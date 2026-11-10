@@ -1,5 +1,6 @@
 {
   "name": "scaffolding",
+  "description": "Skills for the scaffolding flow.",
   "owner": { "name": "Timothy" },
   "plugins": [
     {

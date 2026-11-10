@@ -1,6 +1,5 @@
 {
   "name": "flow",
-  "version": "0.1.0",
   "description": "Flow skills: prep, brief, build, review, close, ship-it and supporting skills for Linear-tracked changes.",
   "author": { "name": "Timothy" }
 }
