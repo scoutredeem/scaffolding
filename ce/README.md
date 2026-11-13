@@ -50,6 +50,7 @@ our-project/
 ├── CLAUDE.md                    # @AGENTS.md
 ├── docs/
 │   ├── agents/                            # Written once during installation
+│   │   ├── commits.md                     # commit prefixes that steer version numbering
 │   │   └── domain.md                      # explains about CONTEXT.md and ADRs
 │   ├── adr/                               # architectural decision records
 │   │   ├── 0001-postgres-for-write-model.md
