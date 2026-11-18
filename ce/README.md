@@ -118,6 +118,15 @@ Runs that upload files need `qa-persona/media` connected to the chat as a folder
 
 As per the [Agents Skills Standard][2] the skills will be picked up automatically by cursor, codex, gemini, but not claude so we need to symlink into ~/.claude/skills/
 
+### Audit File
+
+Where: `docs/agents/audit.md`
+Version control: yes
+Source: scaffold/ce/templates/agent-docs/agents/audit.md
+Install script:
+
+    - copy the template and fill in the Linear team, GCP project, Cloud Run services and Cloud SQL instances
+
 ### Pattern Docs
 
 Where: `.flow/patterns`
@@ -210,6 +219,7 @@ Spawns a code-standards review with `/code-review` and a FQA with `/fqa`
 4. `/flow-build` - Implement a change brief with tests
 5. `/flow-review` - Review a build
 6. `/ship-it` — push the branch and open a PR with a CI-valid semantic title
+7. `/health-audit` — periodic read-only security/health audit driven by `docs/agents/audit.md`; writes `.flow/audits/<date>.md` and proposes Linear Triage issues
 
 - `/to-milestones`
 - `/domain-modeling` — maintain `CONTEXT.md` and ADRs; model-invoked, reached by `/flow-brief`'s interview. downstream from [Matt Pocock][1]
