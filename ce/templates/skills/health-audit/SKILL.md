@@ -135,7 +135,7 @@ Each draft has:
 
 Show all the drafts and comments as a numbered list. Then offer the choice as lettered options, each on its own line, with the recommendation marked: create all, create a selection, or none. Use a structured choice tool if one is available. Wait.
 
-Create the chosen issues in `linear.team`, in its Triage state, with `linear.project` and `linear.labels` when set. Post the chosen comments. Then write the issue ids back into the report next to their findings.
+Create the chosen issues in `linear.team`, in its Triage state, with `linear.project` and `linear.labels` when set. Check each label with `list_issue_labels` first. If a label doesn't exist, leave it off and mention it in Done; don't create labels. Post the chosen comments. Then write the issue ids back into the report next to their findings.
 
 Triage is done when the user has chosen and the chosen issues and comments exist.
 

@@ -5,7 +5,7 @@ name: <product name>
 linear:
   team: SCO # team key, findings land in its Triage
   project: # optional Linear project name or id
-  labels: [health-audit]
+  labels: [DevOps] # must already exist in the team
 
 gcp:
   project: <gcp-project-id>
