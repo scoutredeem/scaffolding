@@ -15,3 +15,7 @@ This project follows a commit message standard to steer version numbering. See `
 ### Domain docs
 
 This is a single-context project. See `docs/agents/domain.md`.
+
+### Health audit
+
+`/health-audit` runs the periodic security and health audit configured in `docs/agents/audit.md`. Reports go to `.flow/audits/`.

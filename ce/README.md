@@ -51,7 +51,8 @@ our-project/
 ├── docs/
 │   ├── agents/                            # Written once during installation
 │   │   ├── commits.md                     # commit prefixes that steer version numbering
-│   │   └── domain.md                      # explains about CONTEXT.md and ADRs
+│   │   ├── domain.md                      # explains about CONTEXT.md and ADRs
+│   │   └── audit.md                       # ids and thresholds for /health-audit
 │   ├── adr/                               # architectural decision records
 │   │   ├── 0001-postgres-for-write-model.md
 │   │   └── 0002-csv-import-idempotency.md
@@ -65,6 +66,8 @@ our-project/
     │   │   └── brief.md
     │   └── sco-3088-dark-mode/
     │       └── brief.md
+    ├── audits/                            # Dated /health-audit reports
+    │   └── 2026-11-18.md
     ├── archive/                           # Completed changes — moved unchanged from /changes
     │   ├── 2026-03-15-categories/
     │   │   └── brief.md
@@ -153,7 +156,7 @@ Resolve in `/flow-blueprint` and others like this:
 ### Prep (once, dev)
 
 1. Scaffold a basic starter app and put it under version control (known vendor packages installed and third party services configured)
-2. Install the flow scaffold into the project
+2. Install the flow scaffold into the project with `/flow-install` (Flow Skills are installed globally, once per machine)
 3. Configure CI/CD with test commit and test deploy
 
 ### V1 (once, anyone)
@@ -213,13 +216,14 @@ Spawns a code-standards review with `/code-review` and a FQA with `/fqa`
 
 ## Skills
 
-1. `/flow-v1` - Scopes a fresh project and break into milestones
-2. `/flow-prep` - Sets up a Linear issue as a change: name, folder and branch
-3. `/flow-brief` - Specs out one change with a non-technical brief
-4. `/flow-build` - Implement a change brief with tests
-5. `/flow-review` - Review a build
-6. `/ship-it` — push the branch and open a PR with a CI-valid semantic title
-7. `/health-audit` — periodic read-only security/health audit driven by `docs/agents/audit.md`; writes `.flow/audits/<date>.md` and proposes Linear Triage issues
+1. `/flow-install` - Installs the RC file, agent docs and pattern docs into a new or legacy project
+2. `/flow-v1` - Scopes a fresh project and break into milestones
+3. `/flow-prep` - Sets up a Linear issue as a change: name, folder and branch
+4. `/flow-brief` - Specs out one change with a non-technical brief
+5. `/flow-build` - Implement a change brief with tests
+6. `/flow-review` - Review a build
+7. `/ship-it` — push the branch and open a PR with a CI-valid semantic title
+8. `/health-audit` — periodic read-only security/health audit driven by `docs/agents/audit.md`; writes `.flow/audits/<date>.md` and proposes Linear Triage issues
 
 - `/to-milestones`
 - `/domain-modeling` — maintain `CONTEXT.md` and ADRs; model-invoked, reached by `/flow-brief`'s interview. downstream from [Matt Pocock][1]
