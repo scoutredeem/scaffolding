@@ -135,9 +135,17 @@ claude plugin install flow@scaffolding
 Notes:
 
 - Skills are namespaced `flow:<skill>` (e.g. `flow:flow-build`); the short `/flow-build` also works when no other plugin defines the same name.
-- Plugins are copied into a cache on install, so pull updates with `claude plugin marketplace update scaffolding`. To test uncommitted edits, run `claude --plugin-dir ce/templates` instead.
 - Remove any old symlinks from `~/.claude/skills/` first to avoid duplicates.
 - Cursor, codex and gemini don't need this; they read `~/.agents/skills` directly.
+
+To get a fresh copy:
+
+| Install method | Steps |
+| --- | --- |
+| Symlinks | `git pull` in the scaffold folder |
+| Marketplace | `git pull` in the scaffold folder, then `claude plugin marketplace update scaffolding` and `claude plugin update flow@scaffolding`, then restart Claude Code |
+
+The marketplace installs a cached copy of the last commit, so uncommitted edits don't reach it; test those with `claude --plugin-dir ce/templates`.
 
 ### Audit File
 
