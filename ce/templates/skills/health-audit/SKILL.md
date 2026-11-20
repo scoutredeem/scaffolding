@@ -10,6 +10,8 @@ disable-model-invocation: true
 
 **Audit report**: `.flow/audits/<YYYY-MM-DD>.md`, committed with the project, so each run can compare against the last one.
 
+**Audit identity**: the service account `health-audit@<gcp.project>.iam.gserviceaccount.com`, a read-only account made for audits. Every `gcloud` and `bq` call runs as it.
+
 **Finding**: one check result, with a status (`ok` / `warn` / `fail` / `skipped`), the evidence behind it (numbers, ids, log excerpts) and, for `warn` or `fail`, a suggested action.
 
 **Check commands**: before running a check, read its section in [`CHECKS.md`](CHECKS.md). It has the commands, metric names and filters. The status rules are below.
@@ -17,6 +19,7 @@ disable-model-invocation: true
 ## Rules
 
 - Pass the GCP project explicitly on **every** cloud call: `--project=<gcp.project>` for `gcloud`, `--project_id=<gcp.project>` for `bq`, `--project=<id>` for `firebase`. The active gcloud config often points at another client's project.
+- Prefix **every** `gcloud` and `bq` call with `CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT=<audit identity>`, so it runs as the audit identity and leaves the gcloud config untouched. `firebase` uses its own login and runs as the user.
 - A CLI that is missing, logged out, or denied permission makes the check `skipped`. Put the reason and the login command in the report, and move on to the next check.
 - Never print secrets, tokens, connection strings or personal data from logs. Redact emails and user ids in log excerpts.
 - A check that the audit file doesn't configure is `skipped (not configured)`. It is not a failure.
@@ -27,11 +30,18 @@ Read `docs/agents/audit.md`. If it is missing → AUDIT PAUSED: copy the templat
 
 Check the checkout: `git fetch`, then compare `HEAD` with `origin/<code.main_branch>`. If you are on another branch, or behind it → AUDIT PAUSED: ask the user to switch to an up-to-date `code.main_branch`, or to confirm auditing `HEAD` as it is. A dirty working tree goes in the report; keep going.
 
+Check the **audit identity** before any check runs. This is a gate: its failures pause the audit instead of skipping checks. Skip it when `gcp.project` is not set.
+
+1. Make a test call as the audit identity: `CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT=<audit identity> gcloud projects describe <gcp.project> --format='value(projectId)'`. It prints the project id → continue.
+2. Otherwise, as the user, look the account up: `gcloud iam service-accounts describe <audit identity> --project=<gcp.project>`.
+   - `NOT_FOUND` → AUDIT PAUSED: send the user to [Creating a read-only service account for GCP health audits](https://app.notion.com/p/scoutredeem/Creating-a-read-only-service-account-for-GCP-health-audits-41dfa7dd6eb5803bbd8ecaa880a3ff0b), and check again when they say it is set up.
+   - Anything else (the account exists, or the lookup is denied) → AUDIT PAUSED with the test call's error. It is usually a missing Service Account Token Creator role on the account, or an expired login (`gcloud auth login`).
+
 Find the previous report: the newest file in `.flow/audits/` dated before today. Its date sets the **window** for log and metric checks. With no previous report, or when that report is more than 60 days old, the window is the last `defaults.window_days` days. A report already dated today is overwritten by this run.
 
 Echo `Auditing <name> gcp=<gcp.project> ref=<branch>@<short sha> window=<start>..<today>`.
 
-Setup is done when the audit file is read, the ref is confirmed and the window is set.
+Setup is done when the audit file is read, the ref is confirmed, the test call as the audit identity has succeeded and the window is set.
 
 ### AUDIT PAUSED
 
