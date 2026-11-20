@@ -121,32 +121,6 @@ Runs that upload files need `qa-persona/media` connected to the chat as a folder
 
 As per the [Agents Skills Standard][2] the skills will be picked up automatically by cursor, codex, gemini, but not claude so we need to symlink into ~/.claude/skills/
 
-#### Option: install as a Claude Code plugin
-
-Instead of symlinking, Claude Code can load the skills from the `scaffolding` marketplace (defined in `.claude-plugin/marketplace.json` at the repo root). It ships one plugin, `flow`, whose root is `ce/templates` (manifest: `ce/templates/.claude-plugin/plugin.json`).
-
-From a local clone (use this while developing):
-
-```bash
-claude plugin marketplace add /path/to/scaffolding
-claude plugin install flow@scaffolding
-```
-
-Notes:
-
-- Skills are namespaced `flow:<skill>` (e.g. `flow:flow-build`); the short `/flow-build` also works when no other plugin defines the same name.
-- Remove any old symlinks from `~/.claude/skills/` first to avoid duplicates.
-- Cursor, codex and gemini don't need this; they read `~/.agents/skills` directly.
-
-To get a fresh copy:
-
-| Install method | Steps |
-| --- | --- |
-| Symlinks | `git pull` in the scaffold folder |
-| Marketplace | `git pull` in the scaffold folder, then `claude plugin marketplace update scaffolding` and `claude plugin update flow@scaffolding`, then restart Claude Code |
-
-The marketplace installs a cached copy of the last commit, so uncommitted edits don't reach it; test those with `claude --plugin-dir ce/templates`.
-
 ### Audit File
 
 Where: `docs/agents/audit.md`
