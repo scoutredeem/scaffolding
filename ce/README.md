@@ -105,19 +105,12 @@ echo "@AGENTS.md" > CLAUDE.md
 
 Where: `~/.agents/skills`
 Version control: n/a
-Source:
-
-    - scaffold/ce/templates/skills
-    - .cursor/skills/flow-build
-    - .cursor/skills/flow-review
+Source: scaffold/ce/templates/skills
 
 Install script:
 
     - clone/pull from scaffold
     - symlink them for claude `~/.claude/skills/`
-
-`qa-persona` is not a skill (no `SKILL.md`) but the shared protocol for `qa-sally` and `qa-alex`. Symlink it alongside them, as a sibling, so their `../qa-persona/PROTOCOL.md` pointer resolves.
-Runs that upload files need `qa-persona/media` connected to the chat as a folder; the browser upload tool rejects unshared paths.
 
 As per the [Agents Skills Standard][2] the skills will be picked up automatically by cursor, codex, gemini, but not claude so we need to symlink into ~/.claude/skills/
 
@@ -145,33 +138,15 @@ Install script:
 
 ## Pattern docs index
 
-Build and patch using the `/flow-index-patterns` command similar to the `/agent-os:index-standards` command
-
-Resolve in `/flow-blueprint` and others like this:
+Resolve in `/flow-review` and others like this:
 
 > Read `.flow/patterns/index.yml` to identify relevant patterns based on the change being built / briefed
 
 ## Process
 
-### Prep (once, dev)
+### Install (once, dev)
 
-1. Scaffold a basic starter app and put it under version control (known vendor packages installed and third party services configured)
-2. Install the flow scaffold into the project with `/flow-install` (Flow Skills are installed globally, once per machine)
-3. Configure CI/CD with test commit and test deploy
-
-### V1 (once, anyone)
-
-Discover and document product scope and milestone list using `/v1`.
-
-When the skill senses that all descision trees have been explored it offers to split the explored work into milestones, listed for you to file as Linear issues. A tired user can also snapshot the context with `/handoff` and/or explicitly trigger `/to-milestones` to wrap up the grilling session. Commits changes on main branch and pushes.
-
-Key outputs (AGENTS.md, README.md, CONTEXT.md, ADRs, milestone list):
-
-- product name
-- what we're building: 1–3 sentence core purpose, expanded with a paragraph or two of context. End with a sentence on the tech stack and how the build is structured around milestones.
-- what the product does: bulleted list of the high-level user-facing capabilities
-- out of scope list
-- list of milestones each with a name and short description
+Install the flow scaffold into a new or existing project with `/flow-install` (Flow Skills are installed globally, once per machine)
 
 ### Prep (anyone)
 
@@ -191,43 +166,25 @@ Produce a non-technical brief for the change on the current branch using `/flow-
 - Writes a non-technical `brief.md` into the change folder
 - Offers to stop or continue with `/flow-build`
 
-### Build (dev, anyone)
+### Build (anyone)
 
-Builds a brief to deliver a change using `/flow-build`:
-
-- Interviews the user to pick any required vendor packages. Clarifies test seams and implementation tradeoffs etc.
-- Builds a test for a tracer bullet implementation (test red)
-- Implement tracer (test green)
-- Write full test (test red)
-- Implement full test (test green)
-- Run test suite
-- Commit changes and create a PR @V2
-- Stops, but mention `/flow-review` as the next step
+Builds a brief to deliver a change using `/flow-build`
 
 ### Review (dev, anyone)
 
-Spawns a code-standards review with `/code-review` and a FQA with `/fqa`
-
-- Loop through review-and-fix till resolved @HMW
-- Human signs off with `/ship-it` which does:
-- Merge the PR @V2
-- Tag a release @V2
-- Update state docs using `/document` @V2
+Spawns a code-standards review and change spec review with `/flow-review`
 
 ## Skills
 
 1. `/flow-install` - Installs the RC file, agent docs and pattern docs into a new or legacy project
-2. `/flow-v1` - Scopes a fresh project and break into milestones
-3. `/flow-prep` - Sets up a Linear issue as a change: name, folder and branch
-4. `/flow-brief` - Specs out one change with a non-technical brief
-5. `/flow-build` - Implement a change brief with tests
-6. `/flow-review` - Review a build
-7. `/ship-it` — push the branch and open a PR with a CI-valid semantic title
-8. `/health-audit` — periodic read-only security/health audit driven by `docs/agents/audit.md`; writes `.flow/audits/<date>.md` and proposes Linear Triage issues
+2. `/flow-prep` - Sets up a Linear issue as a change: name, folder and branch
+3. `/flow-brief` - Specs out one change with a non-technical brief
+4. `/flow-build` - Implement a change brief with tests
+5. `/flow-review` - Review a build
 
+- `/ship-it` — push the branch and open a PR with a CI-valid semantic title
+- `/health-audit` — periodic read-only security/health audit driven by `docs/agents/audit.md`; writes `.flow/audits/<date>.md` and proposes Linear Triage issues
 - `/to-milestones`
 - `/domain-modeling` — maintain `CONTEXT.md` and ADRs; model-invoked, reached by `/flow-brief`'s interview. downstream from [Matt Pocock][1]
-- `/qa-sally` — blind browser QA on local Studio as Sally, a ministry admin (user-invoked; shares `qa-persona/PROTOCOL.md`)
-- `/qa-alex` — blind browser QA on local Studio as Alex, a content editor (user-invoked; shares `qa-persona/PROTOCOL.md`)
 
 [1]: https://github.com/mattpocock/skills/tree/4ae2317ddb22b046e26455e4f9c9b3aaaf62212d/skills/engineering/domain-modeling
