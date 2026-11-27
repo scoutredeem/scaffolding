@@ -25,9 +25,6 @@ const templates = [
   'flutter_launcher_icons.yaml',
   'l10n.yaml',
   '.github/workflows/test.yml',
-  '.github/workflows/pr_deploy.yml',
-  '.github/workflows/staging_deploy.yml',
-  '.github/workflows/production_deploy.yml',
   '.github/workflows/lint_pr.yml',
   '_meta/.gitignore',
   '.cursor/rules/basic-architecture.mdc',
@@ -50,6 +47,13 @@ const templates = [
   'lib/src/shared/services/crashlytics_service.dart',
   'lib/src/shared/services/service_locator.dart',
   'lib/src/shared/services/store_service.dart'
+];
+
+// Cloudflare Pages deploys, only added when web is a chosen platform
+const webTemplates = [
+  '.github/workflows/pr_deploy.yml',
+  '.github/workflows/staging_deploy.yml',
+  '.github/workflows/production_deploy.yml',
 ];
 
 const packages = [
@@ -89,6 +93,7 @@ const templatePath =
 // for local testing
 // const templatePath = '/Users/paurakh/projects/scoutredeem/scout-redeem-repos/scaffolding/flutter';
 
+let appName = 'test_app';
 let collectedPackages = [];
 let chosenPackages = [];
 let collectedPlatforms = [];
@@ -112,6 +117,10 @@ const run = async () => {
   console.log(`Tweaking templates ...`);
   await tweakTemplates();
 
+  // app_localizations*.dart is gitignored, so generate it before first use
+  console.log(`Generating localisations ...`);
+  await $`flutter gen-l10n`;
+
   console.log(chalk`To set up firebase, run: {bold flutterfire configure}`);
 
   console.log(chalk.green(`\nReady!  🚀 `));
@@ -125,7 +134,7 @@ const tweakTemplates = async () => {
 };
 
 const createApp = async () => {
-  const appName = await $.prompt(
+  appName = await $.prompt(
     'Right, what shall we call it? Enter a valid package name: ',
     { default: 'test_app', noClear: true },
   );
@@ -193,7 +202,11 @@ const installDevPackages = async () => {
 };
 
 const fetchTemplates = async () => {
-  for (const template of templates) {
+  const chosenTemplates = collectedPlatforms.includes('web')
+    ? [...templates, ...webTemplates]
+    : templates;
+
+  for (const template of chosenTemplates) {
     console.log('Fetching template: ', template);
 
     let content = '';
@@ -204,8 +217,14 @@ const fetchTemplates = async () => {
       content = await Deno.readTextFile(`${templatePath}/${template}`);
     }
 
+    // the test templates import the app as package:test_app
+    content = content.replaceAll('package:test_app/', `package:${appName}/`);
+
     await Deno.writeTextFile(template, content);
   }
+
+  // the renamed imports may now be out of order (directives_ordering)
+  await $`dart fix --apply --code=directives_ordering test`;
 };
 
 await run();
