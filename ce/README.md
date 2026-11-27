@@ -182,7 +182,7 @@ Spawns a code-standards review and change spec review with `/flow-review`
 4. `/flow-build` - Implement a change brief with tests
 5. `/flow-review` - Review a build
 
-- `/ship-it` — push the branch and open a PR with a CI-valid semantic title
+- `/to-pr` — push the branch and open a PR with a CI-valid semantic title
 - `/health-audit` — periodic read-only security/health audit driven by `docs/agents/audit.md`; writes `.flow/audits/<date>.md` and proposes Linear Triage issues
 - `/to-milestones`
 - `/domain-modeling` — maintain `CONTEXT.md` and ADRs; model-invoked, reached by `/flow-brief`'s interview. downstream from [Matt Pocock][1]

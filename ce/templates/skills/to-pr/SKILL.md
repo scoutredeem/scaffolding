@@ -1,5 +1,5 @@
 ---
-name: ship-it
+name: to-pr
 description: Ship the current branch — commit check, push or publish, open a PR if none exists.
 disable-model-invocation: true
 ---
