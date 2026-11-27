@@ -1,6 +1,6 @@
 ---
 name: flow-document
-description: 'State of one capability — written from the codebase into docs/states/<capability>.md'
+description: 'State of one capability, written from the codebase into docs/states/<capability>.md. With no capability, a read-only survey of which states the in-flight changes touch.'
 disable-model-invocation: true
 user_invocable: true
 ---
@@ -11,16 +11,11 @@ user_invocable: true
 
 Parse `$ARGUMENTS` as literal tokens.
 
-First positional token = `<capability>`. Maps to `docs/states/<capability>.md`.
-If `<capability>` is omitted, list every file in `docs/states/` plus the option for a new capability, then wait.
+First positional token = `<capability>`. Maps to `docs/states/<capability>.md`. If that file already exists, the name is confirmed: skip **Sanitization** and go straight to **Inspect**.
 
-### New capability name
+If `<capability>` is omitted, run the **survey** instead: open `steps/survey.md` and follow only that file. It is a separate, read-only workflow, so skip the rest of this file except **Sanitization**.
 
-Skip this section if we already have a capability name.
-
-Remind me what we are looking for by asking:
-
-> A capability is a named, product-level slice of behavior the app exposes, e.g. `authentication` or `billing` — a short noun. What capability should we document?
+A **capability** is a named, product-level slice of behavior the app exposes, e.g. `authentication` or `billing`. Its name is a short noun.
 
 ### Sanitization
 
@@ -37,7 +32,7 @@ Surface the transformed name and confirm before proceeding (single-step yes/no).
 
 ## Inspect
 
-Inspect only a confirmed name.
+Inspect only a confirmed name: an existing capability, or a new name you have confirmed with me after **Sanitization**.
 
 Read `CONTEXT.md` (and `CONTEXT-MAP.md` if it exists) so the **state** uses product language. Read `docs/adr/` entries that touch this capability. If any of these are missing, proceed silently.
 
