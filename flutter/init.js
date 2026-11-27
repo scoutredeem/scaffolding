@@ -25,9 +25,6 @@ const templates = [
   'flutter_launcher_icons.yaml',
   'l10n.yaml',
   '.github/workflows/test.yml',
-  '.github/workflows/pr_deploy.yml',
-  '.github/workflows/staging_deploy.yml',
-  '.github/workflows/production_deploy.yml',
   '.github/workflows/lint_pr.yml',
   '_meta/.gitignore',
   '.cursor/rules/basic-architecture.mdc',
@@ -50,6 +47,13 @@ const templates = [
   'lib/src/shared/services/crashlytics_service.dart',
   'lib/src/shared/services/service_locator.dart',
   'lib/src/shared/services/store_service.dart'
+];
+
+// Cloudflare Pages deploys, only added when web is a chosen platform
+const webTemplates = [
+  '.github/workflows/pr_deploy.yml',
+  '.github/workflows/staging_deploy.yml',
+  '.github/workflows/production_deploy.yml',
 ];
 
 const packages = [
@@ -198,7 +202,11 @@ const installDevPackages = async () => {
 };
 
 const fetchTemplates = async () => {
-  for (const template of templates) {
+  const chosenTemplates = collectedPlatforms.includes('web')
+    ? [...templates, ...webTemplates]
+    : templates;
+
+  for (const template of chosenTemplates) {
     console.log('Fetching template: ', template);
 
     let content = '';
