@@ -66,9 +66,9 @@ To add a new language, say Spanish:
 1. add a translation file called `lib/src/localization/app_es.arb`
 2. add the language to the `supportedLocales` list in `lib/src/app.dart`
 
-Every time you build your app, an up-to-date app_localizations.dart file is generated in
-the untracked `.dart_tool/flutter_gen/gen_l10n` folder so that the new strings and
-functions become available on the build context for you to reference.
+The `lib/src/localization/app_localizations*.dart` files are generated from the `.arb`
+files and are gitignored. Run `flutter gen-l10n` after changing an `.arb` file so that
+the new strings and functions become available on the build context for you to reference.
 
 The widely used "Application Resource Bundles" format is basically just json with some
 standard conventions to add meta-data to translation phrases. For example, a phrase that

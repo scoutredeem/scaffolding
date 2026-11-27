@@ -29,6 +29,9 @@ jobs:
       # Get flutter dependencies.
       - run: flutter pub get
 
+      # Generate the gitignored lib/src/localization/app_localizations*.dart files.
+      - run: flutter gen-l10n
+
       # Check for any formatting issues in the code. # TODO: Fix after https://github.com/flutter/flutter/issues/102983 is resolved
       # - run: dart run dart_style:format --dry-run --set-exit-if-changed .
 

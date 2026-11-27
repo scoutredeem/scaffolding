@@ -113,6 +113,10 @@ const run = async () => {
   console.log(`Tweaking templates ...`);
   await tweakTemplates();
 
+  // app_localizations*.dart is gitignored, so generate it before first use
+  console.log(`Generating localisations ...`);
+  await $`flutter gen-l10n`;
+
   console.log(chalk`To set up firebase, run: {bold flutterfire configure}`);
 
   console.log(chalk.green(`\nReady!  🚀 `));
